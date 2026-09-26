@@ -56,11 +56,16 @@ python3 build_notion_markdown.py
 - **Rôle** : Génère la synthèse markdown consolidée avec tableau hiérarchisé par statut, fiches détaillées du Top 5 vérifié et templates de messages d'approche personnalisés (sans hallucination de prénom).
 - **Sortie** : `data/lead_intelligence_room.md`.
 
-### 4. Contrôle Qualité Automatisé (QA)
+### 4. Contrôle Qualité Automatisé (QA 20 Points & Tests Négatifs)
 ```bash
 python3 qa_check.py
 ```
-- **Rôle** : Exécute automatiquement la vérification des 10 points de contrôle du protocole qualité (`docs/QA_PROTOCOL.md`) sur le dataset requalifié. Tout échec est tracé par numéro de ligne.
+- **Rôle** : Exécute automatiquement la vérification des 20 points de contrôle de vérité métier du protocole qualité (`docs/QA_PROTOCOL.md`) ainsi qu'une suite de tests négatifs sur fixtures délibérément corrompues.
+- **Points Clés** :
+  - Hard gates pour le statut `VERIFIED` (`MATCH_CONFIRMED`, ICP strict 2-20, dirigeant officiel, HTTPS).
+  - Plafond strict de confiance (max 60 si non-VERIFIED, max 40 si matching incertain).
+  - Neutralisation du score Ghostwriting (0/100) en l'absence d'audit LinkedIn vérifié.
+  - Zéro affirmation non prouvée dans l'outreach et aucun faux signal dérivé des avis Google.
 
 ---
 

@@ -33,3 +33,7 @@ Le pôle rédactionnel applique strictement le skill [`linkedin-ghostwriting`](/
 - **Framework d'Accroche (Hook)** : Formule en 4 temps (1ère ligne percutante, 2ème ligne renforçant le contraste, zéro jargon, passage immédiat aux preuves).
 - **Structures de Posts Autorisées** : Case study découpé, démontage d'idées reçues du secteur web, audit transparent d'échec technique surmonté.
 - **Anti-patterns Bannis** : Storytelling larmoyant, métriques inventées, promesses creuses de génération de leads, formatage excessif d'emojis.
+
+## 4. Statut du Score Ghostwriting dans le Dataset (Phase 1)
+- Conformément à la règle de vérité absolue, le `ghostwriting_score` dans le dataset initial est **neutralisé à 0/100 (Option B)**.
+- **Justification** : Aucun score de ghostwriting ne peut être calculé de manière fiable sans audit direct et vérifié des profils LinkedIn publics des dirigeants (activité éditoriale, régularité, ton). Tout score déduit d'avis Google ou de la taille SIRENE est banni. La sélection Lead Intelligence ne dépend d'aucun score GW synthétique.

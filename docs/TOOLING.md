@@ -32,3 +32,28 @@ Tout ajout d'outil payant ou complexe exige au préalable :
   2. **Catégorie d'activité** : Filtrage strict sur les libellés relatifs à la création web/digitale.
   3. **Dédoublonnage domaine** : Unicité sur le domaine canonique (sans sous-domaine `www`).
   4. **Dédoublonnage téléphone** : Unicité sur le numéro normalisé (standard national `0X...`).
+
+### `requalify_leads.py`
+- **Rôle** : Requalification légale SIRENE, audit technique web HTTP/HTTPS direct, et calcul des scores découplés.
+- **Entrée** : `data/gmaps_agences_web_shortlist.csv`.
+- **Sorties** : `data/top30_leads_requalified.csv` et `data/top30_leads_requalified.json`.
+- **Règles appliquées** :
+  1. **Matching SIRENE Déterministe** : Évaluation croisée identité (normalisation, suppression des suffixes), localisation (code postal strict + voie) et NAF.
+  2. **Statut de Rapprochement** : `MATCH_CONFIRMED`, `MATCH_PLAUSIBLE`, `MATCH_UNCERTAIN`, `NO_MATCH`.
+  3. **ICP Strict (2 à 20 salariés)** : Tranches 02, 03, 11 admises. Tranche 01 admise en VERIFIED uniquement avec preuve secondaire (co-dirigeants déclarés au greffe). Tranches NN, 00 et >20 disqualifiées d'office.
+  4. **Audit Web HTTP** : Contrôle réel du certificat SSL HTTPS et du code de réponse HTTP 200 avec extraction de l'offre observable (`main_offer`) et de la cible (`target_clients`), ou mention `Non vérifié`.
+  5. **Scoring Découplé & Plafonds** : Lead Gen (0-100), Ghostwriting (0/100 neutralisé en Phase 1), Confidence (0-100 avec plafond strict à 60 si non vérifié et 40 si matching incertain).
+  6. **Justifications `reasons`** : Décomposition explicite des composantes Lead Gen, GW et Confidence avec renvoi aux sources.
+
+### `build_notion_markdown.py`
+- **Rôle** : Restitution client et génération de la Lead Intelligence Room.
+- **Entrée** : `data/top30_leads_requalified.json`.
+- **Sortie** : `data/lead_intelligence_room.md`.
+- **Règles appliquées** :
+  1. **Sélection Dynamique du Top 5** : Réservée aux leads `VERIFIED` avec `MATCH_CONFIRMED`.
+  2. **Vérité d'Outreach** : Messages personnalisés sans hallucination (zéro "besoin urgent", zéro "échantillon préparé", salutations nominatives vérifiées).
+
+### `qa_check.py`
+- **Rôle** : Contrôle qualité automatisé à 20 points de contrôle métier + banc de tests négatifs sur fixtures altérées.
+- **Entrées** : `data/top30_leads_requalified.csv`, `data/top30_leads_requalified.json`, `data/lead_intelligence_room.md`.
+- **Exécution** : Bloque toute livraison si un contrôle échoue ou si une anomalie n'est pas détectée sur fixture négative.
