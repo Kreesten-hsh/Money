@@ -26,3 +26,10 @@ Le service *Founder LinkedIn Ghostwriting* aide les dirigeants d'agences digital
 
 ### Étape 5 : Livraison & Publication
 - Le dirigeant publie lui-même nativement sur son profil ou via un outil de planification approuvé.
+
+## 3. Moteur Méthodologique Officiel : Skill `linkedin-ghostwriting`
+Le pôle rédactionnel applique strictement le skill [`linkedin-ghostwriting`](/home/hasashi/.gemini/config/skills/linkedin-ghostwriting/SKILL.md) :
+- **Phase Interview Stratégique** : Extraction de données chiffrées réelles (Avant/Après, taille d'échantillon, résultats vérifiables).
+- **Framework d'Accroche (Hook)** : Formule en 4 temps (1ère ligne percutante, 2ème ligne renforçant le contraste, zéro jargon, passage immédiat aux preuves).
+- **Structures de Posts Autorisées** : Case study découpé, démontage d'idées reçues du secteur web, audit transparent d'échec technique surmonté.
+- **Anti-patterns Bannis** : Storytelling larmoyant, métriques inventées, promesses creuses de génération de leads, formatage excessif d'emojis.

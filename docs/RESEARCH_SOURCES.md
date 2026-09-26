@@ -18,8 +18,9 @@ Lorsqu'une information relative à une entreprise est consignée, sa validité e
 - Annuaires spécialisés de la profession digitale (BPI France, annuaires régionaux French Tech).
 
 ### Niveau 4 : Sources de Découverte & Signaux Faibles
-- Google Maps / Google Business Profile (Note client, volume d'avis, adresse de façade, téléphone standard).
+- **Skill `google-maps-scraper`** : Extraction géolocalisée locale (Docker) via Google Business Profile (Note client, volume d'avis, adresse, téléphone standard).
+- **Skill `agent-reach`** : Router d'investigation multi-plateformes (Twitter, Reddit, YouTube, GitHub, web ouvert) à 0 € d'API pour capter les tendances du secteur, mentions publiques et actualités.
 - Moteurs de recherche publics (Google, DuckDuckGo, Bing).
-- Réseaux sociaux professionnels ouverts (pages d'entreprises publiques).
+- Réseaux sociaux professionnels ouverts (pages d'entreprises publiques uniquement, hors scraping de profils privés).
 
 *Règle d'or : Une source de niveau 4 ne peut en aucun cas se substituer ou prévaloir sur une source de niveau 1 ou 2 pour établir l'effectif ou le statut légal d'une entreprise.*
