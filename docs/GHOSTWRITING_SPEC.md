@@ -1,0 +1,28 @@
+# Spécification du Service Founder LinkedIn Ghostwriting — Money
+
+## 1. Vision & Positionnement du Service
+Le service *Founder LinkedIn Ghostwriting* aide les dirigeants d'agences digitales à incarner leur expertise et leur autorité sur LinkedIn afin de générer de l'attraction d'affaires entrante (Inbound).
+- **Règle absolue d'authenticité** : Aucune histoire, statistique, anecdote ou fausse prétention n'est inventée. La valeur provient uniquement du vécu, des convictions et des victoires techniques réelles de l'agence.
+
+## 2. Processus Opérationnel en 6 Étapes
+
+### Étape 1 : Onboarding & Extraction de Voix
+- Session d'interview audio asynchrone (30 min) ou questionnaire ciblé abordant :
+  - Les partis-pris techniques de l'agence (ex: "Pourquoi nous refusons WordPress au profit de Webflow", "Pourquoi l'éco-conception web fait économiser du budget serveur").
+  - 3 études de cas emblématiques récentes avec difficultés réelles surmontées.
+  - Le style d'élocution naturel (vocabulaire direct, absence de jargon creux).
+
+### Étape 2 : Cartographie Éditoriale (3 Piliers de Contenu)
+1. **Pilier 1 : Thought Leadership & Prises de Position** (40%) : Éclairage d'expert sur les évolutions du marché (IA, fin des cookies, écoconception, design systems).
+2. **Pilier 2 : Proof of Work & Coulisses** (40%) : Décorticage d'une refonte client, avant/après chiffré, erreurs évitées pour les PME.
+3. **Pilier 3 : Culture d'Agence & Management** (20%) : Vision du recrutement, méthodes agiles, vie d'une équipe de 2 à 20 personnes.
+
+### Étape 3 : Rédaction & Calibrage Stylistique
+- Application des standards d'écriture percutante : accroche chirurgicale en 2 lignes, phrases courtes, aération visuelle, appel à la réflexion constructif en fin de post.
+
+### Étape 4 : Validation Client
+- Soumission des brouillons via un tableau partagé Notion avec statut *Brouillon / En Révision / Validé pour Publication*.
+- Le dirigeant conserve le contrôle final et valide chaque mot avant parution.
+
+### Étape 5 : Livraison & Publication
+- Le dirigeant publie lui-même nativement sur son profil ou via un outil de planification approuvé.
