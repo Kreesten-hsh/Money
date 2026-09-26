@@ -1,0 +1,24 @@
+# Python environment
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+.pytest_cache/
+
+# Exclusion stricte des futurs exports CSV bruts non nettoyés (RGPD)
+data/*_raw.csv
+data/raw/
+data/*_uncleaned.csv
+data/temp/
+
+# Préservation explicite du CSV de référence déjà nettoyé
+!data/gmaps_agences_web_raw.csv
+
+# Logs et artefacts locaux
+*.log
+.DS_Store
+*.tmp

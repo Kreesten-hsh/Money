@@ -28,8 +28,9 @@ Chaque enregistrement de prospect qualifié doit respecter strictement le dictio
 | `ghostwriting_score` | integer (0-100) | OUI | Score d'adéquation pour l'offre Founder Ghostwriting |
 | `confidence_score` | integer (0-100) | OUI | Indice de solidité des preuves recueillies (Plafond 60 si données partielles) |
 | `verification_status` | enum | OUI | `CANDIDATE`, `REQUIRES REVIEW`, `PARTIALLY VERIFIED`, `VERIFIED`, `DISQUALIFIED` |
+| `reasons` | list of string (JSON) / string délimité ';' (CSV) | OUI | Justifications textuelles pour chaque composante des 3 scores |
 | `last_checked` | string (YYYY-MM-DD) | OUI | Date de la dernière vérification humaine ou agentique |
-| `notes` | string | NON | Commentaires d'analyse ou points de vigilance particuliers |
+| `notes` | string | NON | Commentaires d'analyse ou points de vigilance particuliers (ex: `site inaccessible`) |
 
 ## 2. Formats de Stockage
 - **CSV Opérationnel** : Format tabulaire plat encodé en UTF-8 avec séparateur virgule (fichier `data/top30_leads_requalified.csv`).

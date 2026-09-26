@@ -1,7 +1,11 @@
 import json
+from pathlib import Path
+
+BASE_DIR = Path(__file__).resolve().parent
 
 def generate_lead_intelligence_markdown():
-    with open('/home/hasashi/Bureau/Money/data/top30_leads_requalified.json', 'r', encoding='utf-8') as f:
+    input_file = BASE_DIR / 'data' / 'top30_leads_requalified.json'
+    with open(input_file, 'r', encoding='utf-8') as f:
         leads = json.load(f)
 
     # Statistiques réelles
@@ -92,11 +96,22 @@ def generate_lead_intelligence_markdown():
         md.append(f"  - `Lead Gen Score` : **{p['lead_gen_score']}/100**")
         md.append(f"  - `Ghostwriting Score` : **{p['ghostwriting_score']}/100**")
         md.append(f"  - `Confidence Score` : **{p['confidence_score']}/100**")
-        md.append(f"- **Signal Commercial Identifié** : {p['commercial_signal']}")
+        signal_desc = p.get('commercial_signal') or "Aucun signal d'affaires récent détecté (audit manuel requis)"
+        md.append(f"- **Signal Commercial Identifié** : {signal_desc}")
         md.append(f"- **Angle d'Approche Lead Intelligence** : Approche orientée apport d'affaires direct sur leur zone de chalandise pour PME cibles.")
-        md.append(f"- **Angle d'Approche Ghostwriting** : Prise de parole de {dirigeant} sur l'expertise technique et les études de cas de {clean_name}.")
+        
+        has_dirigeant = bool(dirigeant and not dirigeant.lower().startswith('non identifié') and dirigeant != 'Inconnu')
+        if has_dirigeant:
+            prenom = dirigeant.split()[0].title()
+            salutation = f"Bonjour {prenom},"
+            gw_angle_desc = f"Prise de parole de {dirigeant} sur l'expertise technique et les études de cas de {clean_name}."
+        else:
+            salutation = "Bonjour,"
+            gw_angle_desc = f"Prise de parole du dirigeant sur l'expertise technique et les études de cas de {clean_name}."
+
+        md.append(f"- **Angle d'Approche Ghostwriting** : {gw_angle_desc}")
         md.append(f"- **Message d'Outreach Recommandé (Manuel)** :")
-        md.append(f"> \"Bonjour {dirigeant.split()[0].title() if dirigeant != 'Non identifié' else ''}, j'ai analysé les réalisations récentes de {clean_name} à {p['city']}. Votre positionnement auprès des PME régionales est très solide. Pour vous éviter les périodes de creux de prospection, nous avons pré-audité 3 entreprises de votre région ayant un besoin immédiat de refonte digitale. Seriez-vous ouvert à ce que je vous transmette ces 3 fiches gracieusement pour recueillir votre retour de dirigeant ?\"")
+        md.append(f"> \"{salutation} j'ai analysé les réalisations récentes de {clean_name} à {p['city']}. Votre positionnement auprès des PME régionales est très solide. Pour vous éviter les périodes de creux de prospection, nous avons pré-audité 3 entreprises de votre région ayant un besoin immédiat de refonte digitale. Seriez-vous ouvert à ce que je vous transmette ces 3 fiches gracieusement pour recueillir votre retour de dirigeant ?\"")
         md.append('')
 
     md.append('---')
@@ -134,7 +149,8 @@ def generate_lead_intelligence_markdown():
     md.append('- **26/09/2026 (Requalification Institutionnelle)** : Intégration SIRENE, découplage des scores, identification de 16 agences formellement vérifiées.')
 
     content = '\n'.join(md)
-    with open('/home/hasashi/Bureau/Money/data/lead_intelligence_room.md', 'w', encoding='utf-8') as f:
+    output_file = BASE_DIR / 'data' / 'lead_intelligence_room.md'
+    with open(output_file, 'w', encoding='utf-8') as f:
         f.write(content)
 
     print(f"Lead Intelligence Room générée avec succès : {len(content)} caractères.")

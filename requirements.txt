@@ -1,0 +1,7 @@
+# Money — Qualification B2B Agences Web (Budget 0€)
+# Le pipeline opérationnel repose exclusivement sur la bibliothèque standard Python (3.10+).
+# Aucune dépendance externe payante ou nécessitant une carte bancaire.
+
+# Optionnel : outillage de linting et tests
+flake8>=6.0.0
+pytest>=7.0.0

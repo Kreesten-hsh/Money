@@ -3,7 +3,7 @@
 > **Campagne** : AI Lead Intelligence & Founder Ghostwriting (MVP)  
 > **Dernière mise à jour** : 26 Septembre 2026 (Requalification Post-Audit)  
 > **Statut** : Échantillon Requalifié par les Registres Publics de l'État (INSEE / SIRENE)  
-> **Données consolidées** : 16 vérifiées | 7 partiellement vérifiées | 6 à auditer | 1 disqualifiée
+> **Données consolidées** : 12 vérifiées | 1 partiellement vérifiées | 12 à auditer | 5 disqualifiée
 
 ---
 
@@ -13,10 +13,10 @@ Cette Lead Intelligence Room documente le premier lot audité d'agences web fran
 
 ### Métriques Clés Consolidées
 - **Volume total analysé** : 30 entreprises.
-- **Entités confirmées dans l'ICP (VERIFIED)** : **16 agences** (SIREN actif, effectif salarié officiel de 1 à 19 salariés, dirigeant légal identifié).
-- **Entités partiellement vérifiées (PARTIALLY VERIFIED)** : **7 agences** (immatriculation active mais sans salarié déclaré ou effectif incertain).
-- **Entités en révision (REQUIRES REVIEW)** : **6 agences** (dénomination commerciale divergente du nom de société légale).
-- **Entités disqualifiées (DISQUALIFIED)** : **1 agence** (fermeture ou radiation au greffe).
+- **Entités confirmées dans l'ICP (VERIFIED)** : **12 agences** (SIREN actif, effectif salarié officiel de 1 à 19 salariés, dirigeant légal identifié).
+- **Entités partiellement vérifiées (PARTIALLY VERIFIED)** : **1 agences** (immatriculation active mais sans salarié déclaré ou effectif incertain).
+- **Entités en révision (REQUIRES REVIEW)** : **12 agences** (dénomination commerciale divergente du nom de société légale).
+- **Entités disqualifiées (DISQUALIFIED)** : **5 agence** (fermeture ou radiation au greffe).
 - **Objectif financier** : 1 000 000 FCFA encaissés avant le 31 décembre 2026 via 2 à 3 pilotes payants.
 
 ---
@@ -38,115 +38,115 @@ Cette Lead Intelligence Room documente le premier lot audité d'agences web fran
 
 | # | Entreprise | Ville | SIREN | Effectif Officiel | Dirigeant Légal | Scores (LG / GW / Conf) | Statut |
 |---|---|---|---|---|---|---|---|
-| 01 | **Web Studio** | Nantes | `804590487` | 3 à 5 salariés | NICOLAS SANCHEZ | `100` / `95` / `100` | ✅ VERIFIED |
-| 02 | **Youdemus - Agence web Paris** | Paris | `790324628` | 6 à 9 salariés | AXEL MICHEL BERNARD PARATRE | `100` / `85` / `100` | ✅ VERIFIED |
-| 03 | **MASHVP** | Toulouse | `815258066` | 6 à 9 salariés | TONY LOUIS COME MARCELLO | `100` / `85` / `100` | ✅ VERIFIED |
-| 04 | **SW Agency, Agence Digitale** | Lyon | `519949283` | 1 ou 2 salariés | DANIEL VICTOR CLAUDE DAMIEN | `93` / `87` / `100` | ✅ VERIFIED |
-| 05 | **Web Tribe Studio** | Bordeaux | `888326048` | 1 ou 2 salariés | JEAN-PHILIPPE FRANC FILLIE | `93` / `87` / `100` | ✅ VERIFIED |
-| 06 | **Agence Web Paris** | Paris | `397836388` | 10 à 19 salariés | DOMINIQUE PARIS | `93` / `85` / `100` | ✅ VERIFIED |
-| 07 | **AE2 agence web** | Nantes | `494283989` | 10 à 19 salariés | YANN BRUNEAU | `93` / `85` / `100` | ✅ VERIFIED |
-| 08 | **LACKY** | Marseille | `802813758` | 1 ou 2 salariés | SUY HIENG TANG | `93` / `77` / `100` | ✅ VERIFIED |
-| 09 | **Evolyon** | Lyon | `823956289` | 1 ou 2 salariés | FRÉDÉRIC JULIEN FRANCE | `93` / `77` / `100` | ✅ VERIFIED |
-| 10 | **Weby Lab** | Lyon | `920317377` | 1 ou 2 salariés | KARIM KORRICHI | `93` / `77` / `100` | ✅ VERIFIED |
-| 11 | **Uniweb - Agence Web Toulouse** | Autre | `841999121` | 3 à 5 salariés | PIERRE PRAT | `93` / `77` / `100` | ✅ VERIFIED |
-| 12 | **Ideclap** | Bordeaux | `850203555` | 1 ou 2 salariés | VANESSA VIVET | `93` / `77` / `100` | ✅ VERIFIED |
-| 13 | **KWANTIC** | Bordeaux | `838234441` | 3 à 5 salariés | Non identifié au registre | `93` / `52` / `100` | ✅ VERIFIED |
-| 14 | **Net comme Web** | Lyon | `750061251` | 3 à 5 salariés | CECILE ROZIER | `88` / `85` / `100` | ✅ VERIFIED |
-| 15 | **Agence Web Paris - Bew Web Agency** | Paris | `397836388` | 10 à 19 salariés | DOMINIQUE PARIS | `86` / `85` / `100` | ✅ VERIFIED |
-| 16 | **LATELIER** | Nantes | `808536072` | 1 ou 2 salariés | JULIEN PIERRE JOSE GERALDES | `86` / `77` / `100` | ✅ VERIFIED |
-| 17 | **Création site internet Marseille - Agence Boosteo** | Marseille | `527626154` | 0 salarié déclaré (Non employeur) | FRANCK MEYER | `65` / `62` / `90` | 🟡 PARTIALLY |
-| 18 | **Simplement** | Marseille | `443082169` | 0 salarié déclaré (Non employeur) | Non identifié au registre | `80` / `45` / `90` | 🟡 PARTIALLY |
-| 19 | **13 en Web** | Marseille | `492957154` | 0 salarié déclaré (Non employeur) | Non identifié au registre | `73` / `37` / `90` | 🟡 PARTIALLY |
-| 20 | **WeDezign** | Paris | `100191071` | 0 salarié déclaré (Non employeur) | ALEXANDRE JÉRÉMY JULIEN FOREST | `73` / `70` / `90` | 🟡 PARTIALLY |
-| 21 | **Appalga** | Bordeaux | `812574655` | 0 salarié déclaré (Non employeur) | NAZEM SAMAD | `73` / `70` / `90` | 🟡 PARTIALLY |
-| 22 | **idéveloppement** | Bordeaux | `840761845` | 0 salarié au 31/12 | JEAN JACQUES SOLA | `73` / `70` / `90` | 🟡 PARTIALLY |
-| 23 | **Agence web Fair** | Nantes | `750648586` | 0 salarié déclaré (Non employeur) | STEPHANE LANDEMAINE | `80` / `70` / `90` | 🟡 PARTIALLY |
-| 24 | **MyCréateurdeSite** | Marseille | `Non trouvé` | Incertain | Non identifié au registre | `70` / `37` / `40` | 🔍 REVIEW |
-| 25 | **4Beez** | Paris | `Non trouvé` | Incertain | Non identifié au registre | `85` / `45` / `40` | 🔍 REVIEW |
-| 26 | **Agoralys** | Toulouse | `Non trouvé` | Incertain | Non identifié au registre | `85` / `45` / `40` | 🔍 REVIEW |
-| 27 | **KWALT DIGITAL** | Toulouse | `Non trouvé` | Incertain | Non identifié au registre | `85` / `45` / `40` | 🔍 REVIEW |
-| 28 | **DCVO STUDIO** | Toulouse | `Non trouvé` | Incertain | Non identifié au registre | `78` / `47` / `40` | 🔍 REVIEW |
-| 29 | **Hdigiweb** | Toulouse | `Non trouvé` | Incertain | Non identifié au registre | `78` / `45` / `40` | 🔍 REVIEW |
-| 30 | **Webcore** | Lyon | `498385343` | 0 salarié déclaré (Non employeur) | Non identifié au registre | `73` / `37` / `75` | ❌ DISQUALIFIED |
+| 01 | **Web Studio** | Nantes | `920816238` | 3 à 5 salariés | KEVIN HAMON | `75` / `95` / `100` | ✅ VERIFIED |
+| 02 | **4Beez** | Paris | `837559301` | 3 à 5 salariés | KARIM BELHADJ LARBI | `75` / `85` / `100` | ✅ VERIFIED |
+| 03 | **Youdemus - Agence web Paris** | Paris | `790324628` | 6 à 9 salariés | AXEL MICHEL BERNARD PARATRE | `75` / `85` / `100` | ✅ VERIFIED |
+| 04 | **MASHVP** | Toulouse | `815258066` | 6 à 9 salariés | TONY LOUIS COME MARCELLO | `75` / `85` / `100` | ✅ VERIFIED |
+| 05 | **Uniweb - Agence Web Toulouse** | Autre | `841999121` | 3 à 5 salariés | PIERRE PRAT | `75` / `77` / `100` | ✅ VERIFIED |
+| 06 | **KWANTIC** | Bordeaux | `838234441` | 3 à 5 salariés | Non identifié au registre | `75` / `52` / `100` | ✅ VERIFIED |
+| 07 | **Net comme Web** | Lyon | `750061251` | 3 à 5 salariés | CECILE ROZIER | `70` / `85` / `100` | ✅ VERIFIED |
+| 08 | **Web Tribe Studio** | Bordeaux | `888326048` | 1 ou 2 salariés | JEAN-PHILIPPE FRANC FILLIE | `68` / `87` / `100` | ✅ VERIFIED |
+| 09 | **AE2 agence web** | Nantes | `494283989` | 10 à 19 salariés | YANN BRUNEAU | `68` / `85` / `100` | ✅ VERIFIED |
+| 10 | **Simplement** | Marseille | `881530265` | 1 ou 2 salariés | JONATHAN COLNAT | `68` / `77` / `100` | ✅ VERIFIED |
+| 11 | **Evolyon** | Lyon | `823956289` | 1 ou 2 salariés | FRÉDÉRIC JULIEN FRANCE | `68` / `77` / `100` | ✅ VERIFIED |
+| 12 | **Ideclap** | Bordeaux | `850203555` | 1 ou 2 salariés | VANESSA VIVET | `68` / `77` / `100` | ✅ VERIFIED |
+| 13 | **Agence web Fair** | Nantes | `214401093` | Code INSEE 52 | Non identifié au registre | `60` / `45` / `60` | 🟡 PARTIALLY |
+| 14 | **Création site internet Marseille - Agence Boosteo** | Marseille | `Non trouvé` | Incertain | Non identifié au registre | `60` / `37` / `40` | 🔍 REVIEW |
+| 15 | **MyCréateurdeSite** | Marseille | `Non trouvé` | Incertain | Non identifié au registre | `60` / `37` / `40` | 🔍 REVIEW |
+| 16 | **Agence Web Paris** | Paris | `Non trouvé` | Incertain | Non identifié au registre | `60` / `45` / `40` | 🔍 REVIEW |
+| 17 | **Agence Web Paris - Bew Web Agency** | Paris | `Non trouvé` | Incertain | Non identifié au registre | `60` / `45` / `40` | 🔍 REVIEW |
+| 18 | **WeDezign** | Paris | `Non trouvé` | Incertain | Non identifié au registre | `60` / `45` / `40` | 🔍 REVIEW |
+| 19 | **Weby Lab** | Lyon | `Non trouvé` | Incertain | Non identifié au registre | `60` / `45` / `20` | 🔍 REVIEW |
+| 20 | **SW Agency, Agence Digitale** | Lyon | `Non trouvé` | Incertain | Non identifié au registre | `60` / `55` / `40` | 🔍 REVIEW |
+| 21 | **KWALT DIGITAL** | Toulouse | `Non trouvé` | Incertain | Non identifié au registre | `60` / `45` / `40` | 🔍 REVIEW |
+| 22 | **DCVO STUDIO** | Toulouse | `Non trouvé` | Incertain | Non identifié au registre | `60` / `47` / `40` | 🔍 REVIEW |
+| 23 | **Hdigiweb** | Toulouse | `Non trouvé` | Incertain | Non identifié au registre | `60` / `45` / `40` | 🔍 REVIEW |
+| 24 | **Appalga** | Bordeaux | `Non trouvé` | Incertain | Non identifié au registre | `60` / `45` / `40` | 🔍 REVIEW |
+| 25 | **idéveloppement** | Bordeaux | `Non trouvé` | Incertain | Non identifié au registre | `60` / `45` / `20` | 🔍 REVIEW |
+| 26 | **LACKY** | Marseille | `851953984` | 0 salarié déclaré (Non employeur) | CEDRIC PHILIPPE KTORZA | `0` / `0` / `0` | ❌ DISQUALIFIED |
+| 27 | **13 en Web** | Marseille | `894583418` | 0 salarié déclaré (Non employeur) | LAURENT MATTEI | `0` / `0` / `0` | ❌ DISQUALIFIED |
+| 28 | **Webcore** | Lyon | `878287721` | 0 salarié déclaré (Non employeur) | LOIC JEAN-LUC MUZET | `0` / `0` / `0` | ❌ DISQUALIFIED |
+| 29 | **Agoralys** | Toulouse | `790695712` | 0 salarié déclaré (Non employeur) | FABRICE BRUNO YVES ORTIZ | `0` / `0` / `0` | ❌ DISQUALIFIED |
+| 30 | **LATELIER** | Nantes | `353432172` | 0 salarié déclaré (Non employeur) | FRANCOISE DARRUAU-GAYMELOT | `0` / `0` / `0` | ❌ DISQUALIFIED |
 
 ---
 
 ## 04 — Priority Leads (Top 5 Réellement Vérifiés)
 
 ### 01 — Web Studio (Nantes)
-- **Raison Sociale / SIREN** : WEB STUDIOS | SIREN `804590487`
+- **Raison Sociale / SIREN** : PULSATION STUDIO WEB (PULSATION STUDIO WEB) | SIREN `920816238`
 - **Site Web** : [https://web-studio.fr/](https://web-studio.fr/) | **Téléphone Direct** : `+33 6 81 36 74 04`
-- **Taille Officielle (INSEE)** : **3 à 5 salariés** (Source : [INSEE / Annuaire des Entreprises](https://annuaire-entreprises.data.gouv.fr/entreprise/804590487))
-- **Dirigeant Identifié** : **NICOLAS SANCHEZ** (Dirigeant légal / Associé)
+- **Taille Officielle (INSEE)** : **3 à 5 salariés** (Source : [INSEE / Annuaire des Entreprises](https://annuaire-entreprises.data.gouv.fr/entreprise/920816238))
+- **Dirigeant Identifié** : **KEVIN HAMON** (Gérant et associé indéfiniment responsable)
 - **Évaluation des Scores** :
-  - `Lead Gen Score` : **100/100**
+  - `Lead Gen Score` : **75/100**
   - `Ghostwriting Score` : **95/100**
   - `Confidence Score` : **100/100**
-- **Signal Commercial Identifié** : Preuve sociale certifiée : 5.000000/5 (56 avis Google)
+- **Signal Commercial Identifié** : Aucun signal d'affaires récent détecté (audit manuel requis)
 - **Angle d'Approche Lead Intelligence** : Approche orientée apport d'affaires direct sur leur zone de chalandise pour PME cibles.
-- **Angle d'Approche Ghostwriting** : Prise de parole de NICOLAS SANCHEZ sur l'expertise technique et les études de cas de Web Studio.
+- **Angle d'Approche Ghostwriting** : Prise de parole de KEVIN HAMON sur l'expertise technique et les études de cas de Web Studio.
 - **Message d'Outreach Recommandé (Manuel)** :
-> "Bonjour Nicolas, j'ai analysé les réalisations récentes de Web Studio à Nantes. Votre positionnement auprès des PME régionales est très solide. Pour vous éviter les périodes de creux de prospection, nous avons pré-audité 3 entreprises de votre région ayant un besoin immédiat de refonte digitale. Seriez-vous ouvert à ce que je vous transmette ces 3 fiches gracieusement pour recueillir votre retour de dirigeant ?"
+> "Bonjour Kevin, j'ai analysé les réalisations récentes de Web Studio à Nantes. Votre positionnement auprès des PME régionales est très solide. Pour vous éviter les périodes de creux de prospection, nous avons pré-audité 3 entreprises de votre région ayant un besoin immédiat de refonte digitale. Seriez-vous ouvert à ce que je vous transmette ces 3 fiches gracieusement pour recueillir votre retour de dirigeant ?"
 
-### 02 — Youdemus - Agence web Paris (Paris)
+### 02 — 4Beez (Paris)
+- **Raison Sociale / SIREN** : 4BEEZ | SIREN `837559301`
+- **Site Web** : [https://4beez.agency/](https://4beez.agency/) | **Téléphone Direct** : `+33 1 76 54 30 97`
+- **Taille Officielle (INSEE)** : **3 à 5 salariés** (Source : [INSEE / Annuaire des Entreprises](https://annuaire-entreprises.data.gouv.fr/entreprise/837559301))
+- **Dirigeant Identifié** : **KARIM BELHADJ LARBI** (Directeur Général)
+- **Évaluation des Scores** :
+  - `Lead Gen Score` : **75/100**
+  - `Ghostwriting Score` : **85/100**
+  - `Confidence Score` : **100/100**
+- **Signal Commercial Identifié** : Aucun signal d'affaires récent détecté (audit manuel requis)
+- **Angle d'Approche Lead Intelligence** : Approche orientée apport d'affaires direct sur leur zone de chalandise pour PME cibles.
+- **Angle d'Approche Ghostwriting** : Prise de parole de KARIM BELHADJ LARBI sur l'expertise technique et les études de cas de 4Beez.
+- **Message d'Outreach Recommandé (Manuel)** :
+> "Bonjour Karim, j'ai analysé les réalisations récentes de 4Beez à Paris. Votre positionnement auprès des PME régionales est très solide. Pour vous éviter les périodes de creux de prospection, nous avons pré-audité 3 entreprises de votre région ayant un besoin immédiat de refonte digitale. Seriez-vous ouvert à ce que je vous transmette ces 3 fiches gracieusement pour recueillir votre retour de dirigeant ?"
+
+### 03 — Youdemus - Agence web Paris (Paris)
 - **Raison Sociale / SIREN** : YOUDEMUS | SIREN `790324628`
 - **Site Web** : [https://www.youdemus.fr/?utm_source=google&utm_medium=gmb&utm_campaign=gmb_paris](https://www.youdemus.fr/?utm_source=google&utm_medium=gmb&utm_campaign=gmb_paris) | **Téléphone Direct** : `+33 1 84 17 26 34`
 - **Taille Officielle (INSEE)** : **6 à 9 salariés** (Source : [INSEE / Annuaire des Entreprises](https://annuaire-entreprises.data.gouv.fr/entreprise/790324628))
-- **Dirigeant Identifié** : **AXEL MICHEL BERNARD PARATRE** (Dirigeant légal / Associé)
+- **Dirigeant Identifié** : **AXEL MICHEL BERNARD PARATRE** (Gérant)
 - **Évaluation des Scores** :
-  - `Lead Gen Score` : **100/100**
+  - `Lead Gen Score` : **75/100**
   - `Ghostwriting Score` : **85/100**
   - `Confidence Score` : **100/100**
-- **Signal Commercial Identifié** : Preuve sociale certifiée : 5.000000/5 (54 avis Google)
+- **Signal Commercial Identifié** : Aucun signal d'affaires récent détecté (audit manuel requis)
 - **Angle d'Approche Lead Intelligence** : Approche orientée apport d'affaires direct sur leur zone de chalandise pour PME cibles.
 - **Angle d'Approche Ghostwriting** : Prise de parole de AXEL MICHEL BERNARD PARATRE sur l'expertise technique et les études de cas de Youdemus - Agence web Paris.
 - **Message d'Outreach Recommandé (Manuel)** :
 > "Bonjour Axel, j'ai analysé les réalisations récentes de Youdemus - Agence web Paris à Paris. Votre positionnement auprès des PME régionales est très solide. Pour vous éviter les périodes de creux de prospection, nous avons pré-audité 3 entreprises de votre région ayant un besoin immédiat de refonte digitale. Seriez-vous ouvert à ce que je vous transmette ces 3 fiches gracieusement pour recueillir votre retour de dirigeant ?"
 
-### 03 — MASHVP (Toulouse)
+### 04 — MASHVP (Toulouse)
 - **Raison Sociale / SIREN** : MASHVP | SIREN `815258066`
 - **Site Web** : [https://mashvp.com/](https://mashvp.com/) | **Téléphone Direct** : `+33 9 62 62 11 51`
 - **Taille Officielle (INSEE)** : **6 à 9 salariés** (Source : [INSEE / Annuaire des Entreprises](https://annuaire-entreprises.data.gouv.fr/entreprise/815258066))
-- **Dirigeant Identifié** : **TONY LOUIS COME MARCELLO** (Dirigeant légal / Associé)
+- **Dirigeant Identifié** : **TONY LOUIS COME MARCELLO** (Gérant)
 - **Évaluation des Scores** :
-  - `Lead Gen Score` : **100/100**
+  - `Lead Gen Score` : **75/100**
   - `Ghostwriting Score` : **85/100**
   - `Confidence Score` : **100/100**
-- **Signal Commercial Identifié** : Preuve sociale certifiée : 4.900000/5 (51 avis Google)
+- **Signal Commercial Identifié** : Aucun signal d'affaires récent détecté (audit manuel requis)
 - **Angle d'Approche Lead Intelligence** : Approche orientée apport d'affaires direct sur leur zone de chalandise pour PME cibles.
 - **Angle d'Approche Ghostwriting** : Prise de parole de TONY LOUIS COME MARCELLO sur l'expertise technique et les études de cas de MASHVP.
 - **Message d'Outreach Recommandé (Manuel)** :
 > "Bonjour Tony, j'ai analysé les réalisations récentes de MASHVP à Toulouse. Votre positionnement auprès des PME régionales est très solide. Pour vous éviter les périodes de creux de prospection, nous avons pré-audité 3 entreprises de votre région ayant un besoin immédiat de refonte digitale. Seriez-vous ouvert à ce que je vous transmette ces 3 fiches gracieusement pour recueillir votre retour de dirigeant ?"
 
-### 04 — SW Agency, Agence Digitale (Lyon)
-- **Raison Sociale / SIREN** : SW CONSEIL | SIREN `519949283`
-- **Site Web** : [https://www.sw-siteinternet.com/](https://www.sw-siteinternet.com/) | **Téléphone Direct** : `+33 7 83 11 38 67`
-- **Taille Officielle (INSEE)** : **1 ou 2 salariés** (Source : [INSEE / Annuaire des Entreprises](https://annuaire-entreprises.data.gouv.fr/entreprise/519949283))
-- **Dirigeant Identifié** : **DANIEL VICTOR CLAUDE DAMIEN** (Dirigeant légal / Associé)
+### 05 — Uniweb - Agence Web Toulouse (Autre)
+- **Raison Sociale / SIREN** : UNIWEB (UNIWEB) | SIREN `841999121`
+- **Site Web** : [https://www.uniweb-toulouse.fr/](https://www.uniweb-toulouse.fr/) | **Téléphone Direct** : `+33 5 34 31 51 76`
+- **Taille Officielle (INSEE)** : **3 à 5 salariés** (Source : [INSEE / Annuaire des Entreprises](https://annuaire-entreprises.data.gouv.fr/entreprise/841999121))
+- **Dirigeant Identifié** : **PIERRE PRAT** (Gérant)
 - **Évaluation des Scores** :
-  - `Lead Gen Score` : **93/100**
-  - `Ghostwriting Score` : **87/100**
+  - `Lead Gen Score` : **75/100**
+  - `Ghostwriting Score` : **77/100**
   - `Confidence Score` : **100/100**
-- **Signal Commercial Identifié** : Preuve sociale certifiée : 4.800000/5 (51 avis Google)
+- **Signal Commercial Identifié** : Aucun signal d'affaires récent détecté (audit manuel requis)
 - **Angle d'Approche Lead Intelligence** : Approche orientée apport d'affaires direct sur leur zone de chalandise pour PME cibles.
-- **Angle d'Approche Ghostwriting** : Prise de parole de DANIEL VICTOR CLAUDE DAMIEN sur l'expertise technique et les études de cas de SW Agency, Agence Digitale.
+- **Angle d'Approche Ghostwriting** : Prise de parole de PIERRE PRAT sur l'expertise technique et les études de cas de Uniweb - Agence Web Toulouse.
 - **Message d'Outreach Recommandé (Manuel)** :
-> "Bonjour Daniel, j'ai analysé les réalisations récentes de SW Agency, Agence Digitale à Lyon. Votre positionnement auprès des PME régionales est très solide. Pour vous éviter les périodes de creux de prospection, nous avons pré-audité 3 entreprises de votre région ayant un besoin immédiat de refonte digitale. Seriez-vous ouvert à ce que je vous transmette ces 3 fiches gracieusement pour recueillir votre retour de dirigeant ?"
-
-### 05 — Web Tribe Studio (Bordeaux)
-- **Raison Sociale / SIREN** : WEB TRIBE STUDIO | SIREN `888326048`
-- **Site Web** : [https://webtribe-studio.com/](https://webtribe-studio.com/) | **Téléphone Direct** : `+33 7 72 38 27 81`
-- **Taille Officielle (INSEE)** : **1 ou 2 salariés** (Source : [INSEE / Annuaire des Entreprises](https://annuaire-entreprises.data.gouv.fr/entreprise/888326048))
-- **Dirigeant Identifié** : **JEAN-PHILIPPE FRANC FILLIE** (Dirigeant légal / Associé)
-- **Évaluation des Scores** :
-  - `Lead Gen Score` : **93/100**
-  - `Ghostwriting Score` : **87/100**
-  - `Confidence Score` : **100/100**
-- **Signal Commercial Identifié** : Preuve sociale certifiée : 5.000000/5 (58 avis Google)
-- **Angle d'Approche Lead Intelligence** : Approche orientée apport d'affaires direct sur leur zone de chalandise pour PME cibles.
-- **Angle d'Approche Ghostwriting** : Prise de parole de JEAN-PHILIPPE FRANC FILLIE sur l'expertise technique et les études de cas de Web Tribe Studio.
-- **Message d'Outreach Recommandé (Manuel)** :
-> "Bonjour Jean-Philippe, j'ai analysé les réalisations récentes de Web Tribe Studio à Bordeaux. Votre positionnement auprès des PME régionales est très solide. Pour vous éviter les périodes de creux de prospection, nous avons pré-audité 3 entreprises de votre région ayant un besoin immédiat de refonte digitale. Seriez-vous ouvert à ce que je vous transmette ces 3 fiches gracieusement pour recueillir votre retour de dirigeant ?"
+> "Bonjour Pierre, j'ai analysé les réalisations récentes de Uniweb - Agence Web Toulouse à Autre. Votre positionnement auprès des PME régionales est très solide. Pour vous éviter les périodes de creux de prospection, nous avons pré-audité 3 entreprises de votre région ayant un besoin immédiat de refonte digitale. Seriez-vous ouvert à ce que je vous transmette ces 3 fiches gracieusement pour recueillir votre retour de dirigeant ?"
 
 ---
 

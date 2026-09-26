@@ -20,3 +20,15 @@
 Tout ajout d'outil payant ou complexe exige au préalable :
 1. Une preuve d'inefficacité des alternatives gratuites (INSEE, Scraper local, Python).
 2. Un calcul de rentabilité montrant que le coût est absorbé par un contrat client signé.
+
+## 3. Scripts Opérationnels Internes
+
+### `dedupe_and_shortlist.py`
+- **Rôle** : Nettoyage, filtrage et dédoublonnage strict du vivier brut issu de Google Maps.
+- **Entrée** : `data/gmaps_agences_web_raw.csv` (nettoyé des colonnes personnelles / RGPD).
+- **Sortie** : `data/gmaps_agences_web_shortlist.csv`.
+- **Règles appliquées** :
+  1. **Présence d'un site web** : Élimination des fiches sans URL.
+  2. **Catégorie d'activité** : Filtrage strict sur les libellés relatifs à la création web/digitale.
+  3. **Dédoublonnage domaine** : Unicité sur le domaine canonique (sans sous-domaine `www`).
+  4. **Dédoublonnage téléphone** : Unicité sur le numéro normalisé (standard national `0X...`).
