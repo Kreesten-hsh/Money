@@ -93,3 +93,35 @@ Le système cible la qualification déterministe d'agences web françaises (2 à
 | **DiscoveryPipeline** | `money_v2.discovery.discovery_pipeline` | Découverte dynamique, pagination, exclusion | 0 (stdlib) |
 | **LegalReconciliation** | `money_v2.truth.reconciliation` | Garantie inviolable d'étanchéité légale | 0 (stdlib) |
 | **TruthEvaluator** | `money_v2.truth.truth_evaluator` | Évaluation multi-dimensionnelle de vérité | 0 (stdlib) |
+| **CrawlPlanner** | `money_v2.orchestrator.crawl_planner` | Planification dynamique d'URLs et extraction multi-pages | CrawleeProvider |
+| **LeadIntelligenceService** | `money_v2.services.lead_intelligence_service` | Conformité ICP, score Lead Gen, outreach sans hallucination | 0 (stdlib) |
+| **GhostwritingIntelligenceService** | `money_v2.services.ghostwriting_service` | Éligibilité dirigeant physique, score neutralisé, angles B2B | 0 (stdlib) |
+| **MoneyPipelineV2** | `money_v2.pipeline` | Pipeline unifié E2E découverte -> qualification -> enrichissement -> dual output | 0 (stdlib) |
+| **CLI run_pipeline_v2.py** | `run_pipeline_v2.py` | Point d'entrée de traitement batch dynamique et QA | 0 (stdlib) |
+
+---
+
+## 4. Architecture Dual-Product & Couche de Vérité Partagée
+
+L'architecture V2.2 unifie deux offres commerciales à haute valeur ajoutée sur le même socle d'évidence et de registres légaux :
+
+```
+                        ┌──────────────────────────────┐
+                        │      EVIDENCE & TRUTH        │
+                        │    RECONCILIATION LAYER      │
+                        │ (SIRENE + OSINT multi-source)│
+                        └──────────────┬───────────────┘
+                                       │
+                ┌──────────────────────┴──────────────────────┐
+                ▼                                             ▼
+  ┌───────────────────────────┐                 ┌───────────────────────────┐
+  │   AI Lead Intelligence    │                 │ Founder LinkedIn          │
+  │   Service                 │                 │ Ghostwriting Service      │
+  │───────────────────────────│                 │───────────────────────────│
+  │ - Score Lead Gen /100     │                 │ - Score Ghostwriting /100 │
+  │ - Validation ICP 2-20     │                 │ - Neutralisation à 0/100  │
+  │ - Accroche personnalisée  │                 │   sans activité observée  │
+  │ - Salutation personne     │                 │ - Angles éditoriaux B2B   │
+  │   morale institutionnelle │                 │   ciblés sur la stack CMS │
+  └───────────────────────────┘                 └───────────────────────────┘
+```

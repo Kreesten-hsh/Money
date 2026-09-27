@@ -17,6 +17,8 @@ class ProviderTelemetry:
     status: ProviderStatus
     records_found: int
     evidence_count: int
+    operation: str = "enrichment"
+    fallback_tier: Optional[int] = None
     error_type: Optional[str] = None
     error_message_safe: Optional[str] = None
 
@@ -24,6 +26,8 @@ class ProviderTelemetry:
         return {
             "provider": self.provider,
             "lead_id": self.lead_id,
+            "operation": self.operation,
+            "fallback_tier": self.fallback_tier,
             "started_at": self.started_at,
             "finished_at": self.finished_at,
             "duration_ms": round(self.duration_ms, 2),

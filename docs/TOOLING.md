@@ -13,12 +13,30 @@
 | **Notion MCP** | Interface de restitution et Lead Intelligence Room client | Inclus | Risque de saturation en cas de design surchargé | **USE NOW** | Interface premium, claire et immédiatement partageable avec un client pilote. |
 | **Scrapling** | Scraping de contournement si blocage ou rendu complexe | 0 € (Open source Python) | Complexité supérieure à un fetch simple | **TEST** | À activer uniquement en repli si Firecrawl échoue sur un site stratégique. |
 | **theHarvester (CLI local)** | Découverte passive d'emails professionnels publics et hôtes DNS | 0 € (Sources ouvertes passives) | Binaire requis dans le PATH système. En cas d'absence : signale `TOOL_UNAVAILABLE` sans feindre de résultat | **USE NOW** | Intégré via `TheHarvesterProvider` avec classification d'email stricte (générique vs nominatif vs dirigeant). |
-| **invisible_playwright_mcp** | Navigation furtive de repli secondaire, contournement WAF & consultation ADR-008 | 0 € (Open source local) | Zéro garantie 100% Turnstile/DataDome. Repli secondaire uniquement, traçabilité `browser_usage_reason`, zéro écrasement SIRENE | **USE NOW** | Piloté via `InvisiblePlaywrightProvider` et `patchright`, encadré par `docs/OPERATOR_RUNBOOK_MCP.md`. |
+| **invisible_playwright_mcp (`patchright_local`)** | Navigation furtive de repli secondaire, contournement WAF & consultation ADR-008 | 0 € (Open source local) | Zéro garantie 100% Turnstile/DataDome. Repli secondaire uniquement, traçabilité `browser_usage_reason`, zéro écrasement SIRENE | **USE NOW** | Piloté via `InvisiblePlaywrightProvider` et `patchright`, encadré par `docs/OPERATOR_RUNBOOK_MCP.md`. |
 | **Crawlee (Runner Node / Python)** | Moteur de batch crawling industriel avec file d'attente, retries et backoff | 0 € (Open source local) | Concurrence et timeout à calibrer selon hôte. Rapport d'état par URL source obligatoire | **USE NOW** | Intégré via `CrawleeProvider` et `crawlee_runner.js` pour arborescences multi-pages. |
 | **API-mega-list (Index 11 860 APIs)** | Catalogue et registre de découverte de services d'enrichissement | 0 € (Index public open data) | Catalogue de découverte, PAS un provider monolithique. Adaptateur isolé requis (ex: `google_dns_doh`) | **USE NOW** | Spécifié sous `docs/API_PROVIDER_REGISTRY.md` via `ApiRegistryProvider` (rejet strict des APIs inactives). |
 | **Proxies Résidentiels Payants** | Évitement de blocages à grande échelle | ~50 à 150 € / mois | Dépense inutile au stade MVP (< 500 leads) | **EXCLUDE** | Banni : non justifié tant qu'aucun client n'a payé. |
 | **OpenOutreach / Mass Emailing Automatisé** | Séquences de cold email automatisées | Variable | Risque élevé de spam, dégradation de domaine | **EXCLUDE** | Banni : la prospection MVP doit rester 100% manuelle et personnalisée. |
 | **Scraping LinkedIn massif / non régulé** | Collecte massive de profils personnels | Risque légal / blocage | Violation des CGU et des règles du projet | **EXCLUDE** | Strictement interdit par ADR-003. La consultation passive unitaire est encadrée par ADR-008. |
+
+---
+
+## 1.1 Matrice d'Intégration Opérationnelle des 4 Outils Externes (Money V2.2)
+
+| Outil | Rôle Money V2 | Méthode d'appel | Modèle d'évidence | Statut si absent |
+|---|---|---|---|---|
+| **invisible_playwright_mcp** | Extraction anti-bot/WAF (Palier 3) & Consultation éditoriale LinkedIn dirigeant certifié (ADR-008) | `FallbackStrategy.execute_inspection_chain` & `enrich_lead` via `InvisiblePlaywrightProvider` | `Evidence(field='main_offer'|'target_clients'|'decision_maker_linkedin_activity')` avec `browser_usage_reason` obligatoire | `TOOL_MISSING` / `TOOL_UNAVAILABLE` |
+| **theHarvester** | Moissonnage passif d'emails professionnels et sous-domaines sans interroger le serveur cible | `EnrichmentOrchestrator.enrich_lead` via `TheHarvesterProvider.execute` | `Evidence(field='public_professional_email')` avec `email_classification` rigoureuse (générique vs nominatif vs dirigeant) | `TOOL_MISSING` / `TOOL_UNAVAILABLE` |
+| **Crawlee** | Exploration industrielle multi-pages (Accueil, Services, Contact, Mentions) avec file d'attente et retries | `CrawlPlanner.execute_lead_crawl` via `CrawleeProvider.crawl_batch` | `Evidence(field='crawled_content'|'main_offer'|'target_clients')` traçant l'URL source exacte de chaque sous-page | `TOOL_MISSING` / `TOOL_UNAVAILABLE` |
+| **API-mega-list** | Adaptateur normalisé d'APIs publiques ouvertes sans clé (`google_dns_doh`) | `EnrichmentOrchestrator.enrich_lead` via `ApiRegistryProvider.execute(api_name='google_dns_doh')` | `Evidence(field='api_doh_record')` rattaché à l'endpoint DNS-over-HTTPS | `TOOL_MISSING` / `CONFIG_ERROR` |
+
+> [!IMPORTANT]
+> **Honnêteté Technique & Décision d'Architecture (`patchright_local`)** :  
+> Le composant `invisible_playwright_mcp` est exécuté localement via le moteur furtif `patchright_local` (Chromium local patché contre la détection `navigator.webdriver` et les empreintes CDP standard) plutôt qu'à travers un serveur MCP distant standalone.  
+> Cette approche constitue une **décision d'architecture délibérée** et non une omission : elle garantit un fonctionnement 100% autonome, zéro dépendance réseau vis-à-vis d'un démon tiers, une latence inférieure à 2 secondes, tout en préservant strictement les mêmes garanties de furtivité, d'auditabilité et de non-écrasement des données légales.
+
+---
 
 ## 2. Règle d'Intégration d'un Nouvel Outil
 Tout ajout d'outil payant ou complexe exige au préalable :

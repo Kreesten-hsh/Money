@@ -2,6 +2,8 @@
   {
     "provider": "http_provider",
     "lead_id": "Linkeo",
+    "operation": "enrichment",
+    "fallback_tier": null,
     "started_at": "2026-09-27T16:08:44Z",
     "finished_at": "2026-09-27T16:08:47Z",
     "duration_ms": 2622.69,

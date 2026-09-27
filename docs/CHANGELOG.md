@@ -2,6 +2,27 @@
 
 Toutes les évolutions significatives du code, de la documentation et des données sont consignées ici.
 
+## [2026-09-27] — Architecture V2.2 : Intégration Complète AI Lead Intelligence + Founder LinkedIn Ghostwriting (Branche feat/architecture-v2.2-integrated-pipeline)
+### Ajouté & Intégré
+- **[Chaîne de Repli à 4 Paliers & Orchestration Réelle]** :
+  - Mise à niveau de `FallbackStrategy` vers une chaîne complète à 4 paliers : `HttpProvider (Tier 1) -> FirecrawlProvider (Tier 2) -> InvisiblePlaywrightProvider (Tier 3) -> CrawleeProvider (Tier 4) -> Consignation Technique (Tier 5)`.
+  - Intégration active et traçable des 4 outils externes dans le flux unifié `enrich_lead` de l'orchestrateur.
+  - Résolution DNS-over-HTTPS active via l'adaptateur `google_dns_doh` d'`ApiRegistryProvider`.
+  - Moissonnage passif d'emails par `TheHarvesterProvider` avec politique stricte de classification.
+  - Consultation unitaire LinkedIn du dirigeant certifié via `InvisiblePlaywrightProvider` (ADR-008).
+- **[Exploration Multi-Pages & CrawlPlanner]** :
+  - Création de `CrawlPlanner` (`money_v2/orchestrator/crawl_planner.py`) analysant les informations manquantes du lead et planifiant les URLs candidates (`/`, `/services`, `/contact`, `/mentions-legales`).
+  - Pilotage du batch crawl via `CrawleeProvider.crawl_batch()` avec attribution structurée de chaque évidence à son URL source spécifique.
+- **[Services Métier Dual-Product]** :
+  - Création de `LeadIntelligenceService` : validation ICP 2-20 salariés agences web France, score Lead Gen (/100, plafond effectif 75 en phase 1), accroches personnalisées sans hallucination et salutation institutionnelle obligatoire sur dirigeant personne morale (ex: KWANTIC / WATTZ OFFICE).
+  - Création de `GhostwritingIntelligenceService` : vérification stricte du dirigeant personne physique certifié, neutralisation mathématique du score à 0/100 en l'absence d'activité publique vérifiée, formulation d'angles éditoriaux B2B ancrés sur la stack CMS et l'offre observée.
+- **[Pipeline Unifié & CLI Batch Dynamique]** :
+  - Création de `MoneyPipelineV2` (`money_v2/pipeline.py`) intégrant découverte, requalification, enrichissement multi-outils, étanchéité légale, évaluation de vérité et génération des dossiers dual-product.
+  - Création de la CLI `run_pipeline_v2.py` avec pagination dynamique (`--offset`, `--limit`), support brut (`--raw-csv`), diagnostic télémétrique (`--explain`) et contrôle QA automatisé.
+- **[Suite d'Intégration E2E & Zéro Régression]** :
+  - Création de `tests/test_v2_2_full_pipeline.py` validant la circulation E2E des données entre tous les composants, le CrawlPlanner, l'API Registry DoH, la neutralisation Ghostwriting, l'étanchéité légale et le traitement par lot dynamique (6/6 PASS).
+  - Maintien intégral à 100% PASS des 24 tests de `tests/test_v2_architecture.py`, des 10 tests de `tests/test_v2_1_negative_suite.py` et des 24 contrôles / 21 fixtures négatives de `qa_check.py`.
+
 ## [2026-09-27] — Architecture V2.1 : Audit & Correctif Intégration Outils MCP / OSINT (Branche feat/architecture-v2.1-tool-audit-and-fix)
 ### Ajouté & Corrigé
 - **[Audit & Statuts Explicites]** :
