@@ -49,3 +49,12 @@ Toute orientation technique ou commerciale significative est consignée ici avec
 - **Statut** : **LATER**
 - **Contexte** : Vendre les deux prestations simultanément dès le premier contact.
 - **Décision** : Reporté après la vente des deux premiers pilotes purs Lead Intelligence afin de ne pas brouiller le message commercial d'entrée.
+
+---
+
+## [ADR-007] Purge de l'historique Git des données brutes Google Maps (Conformité RGPD stricte)
+- **Date** : 2026-09-27
+- **Statut** : **NOW**
+- **Contexte** : Le commit initial exposait dans l'historique public du dépôt des données personnelles non anonymisées issues de Google Maps (noms des commentateurs, photos, avis individuels sous `data/gmaps_agences_web_raw.csv`).
+- **Décision** : Réécriture complète de l'historique git à l'aide de `git-filter-repo` pour exclure définitivement ce fichier et ses deltas passés. Réintroduction d'un fichier nettoyé contenant exclusivement des colonnes RGPD-safe (données d'entreprise publiques uniquement : titre, catégorie, adresse, ville, site, téléphone professionnel, volume et note globale d'avis, url Maps). Force-push sur `origin/main` et contrôle d'invalidation des anciens hashes.
+

@@ -32,18 +32,22 @@ Tout ajout d'outil payant ou complexe exige au préalable :
   2. **Catégorie d'activité** : Filtrage strict sur les libellés relatifs à la création web/digitale.
   3. **Dédoublonnage domaine** : Unicité sur le domaine canonique (sans sous-domaine `www`).
   4. **Dédoublonnage téléphone** : Unicité sur le numéro normalisé (standard national `0X...`).
+  5. **Ordonnancement objectif et déterministe** : Tri pur du vivier par `review_count DESC`, `review_rating DESC`, `title ASC` (élimination intégrale de toute cohorte ou liste de domaines en dur).
 
 ### `requalify_leads.py`
 - **Rôle** : Requalification légale SIRENE, audit technique web HTTP/HTTPS direct, et calcul des scores découplés.
 - **Entrée** : `data/gmaps_agences_web_shortlist.csv`.
+- **Options CLI** : `--offset` (défaut: 0) et `--limit` (défaut: 30) pour permettre le traitement batch itératif (0-30, 30-60, etc.) sans blocage sur la première cohorte.
 - **Sorties** : `data/top30_leads_requalified.csv` et `data/top30_leads_requalified.json`.
 - **Règles appliquées** :
-  1. **Matching SIRENE Déterministe** : Évaluation croisée identité (normalisation, suppression des suffixes), localisation (code postal strict + voie) et NAF.
+  1. **Matching SIRENE Déterministe & Télémétrie** : Évaluation croisée identité (normalisation, suppression des suffixes), localisation (code postal strict + voie) et NAF.
   2. **Statut de Rapprochement** : `MATCH_CONFIRMED`, `MATCH_PLAUSIBLE`, `MATCH_UNCERTAIN`, `NO_MATCH`.
-  3. **ICP Strict (2 à 20 salariés)** : Tranches 02, 03, 11 admises. Tranche 01 admise en VERIFIED uniquement avec preuve secondaire (co-dirigeants déclarés au greffe). Tranches NN, 00 et >20 disqualifiées d'office.
-  4. **Audit Web HTTP** : Contrôle réel du certificat SSL HTTPS et du code de réponse HTTP 200 avec extraction de l'offre observable (`main_offer`) et de la cible (`target_clients`), ou mention `Non vérifié`.
-  5. **Scoring Découplé & Plafonds** : Lead Gen (0-100), Ghostwriting (0/100 neutralisé en Phase 1), Confidence (0-100 avec plafond strict à 60 si non vérifié et 40 si matching incertain).
-  6. **Justifications `reasons`** : Décomposition explicite des composantes Lead Gen, GW et Confidence avec renvoi aux sources.
+  3. **Distinction Échec Technique vs 0 Résultat** : Signalement explicite des pannes ou timeouts d'API (`notes = "ÉCHEC TECHNIQUE API — À RE-VÉRIFIER"`) vs absence réelle d'entreprise au registre, avec reporting récapitulatif en fin de traitement.
+  4. **Détection Formelle des Fermetures** : Identification explicite des entités radiées ou inactives (`company_closed: true`) forçant immédiatement le statut `DISQUALIFIED` (score de confiance 0/100).
+  5. **ICP Strict (2 à 20 salariés)** : Tranches 02, 03, 11 admises. Tranche 01 admise en VERIFIED uniquement avec preuve secondaire (co-dirigeants déclarés au greffe). Tranches NN, 00 et >20 disqualifiées d'office.
+  6. **Audit Web HTTP** : Contrôle réel du certificat SSL HTTPS et du code de réponse HTTP 200 avec extraction de l'offre observable (`main_offer`) et de la cible (`target_clients`), ou mention `Non vérifié`.
+  7. **Scoring Découplé & Plafonds** : Lead Gen (0-100), Ghostwriting (0/100 neutralisé en Phase 1), Confidence (0-100 avec plafond strict à 60 si non vérifié et 40 si matching incertain).
+  8. **Justifications `reasons`** : Décomposition explicite des composantes Lead Gen, GW et Confidence avec renvoi aux sources.
 
 ### `build_notion_markdown.py`
 - **Rôle** : Restitution client et génération de la Lead Intelligence Room.

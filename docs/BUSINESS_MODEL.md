@@ -33,12 +33,13 @@
 - **Total Encaissé** : 2 058 € (**1 350 000 FCFA**).
 - **Nombre de clients uniques nécessaires** : 2 clients fidélisés.
 
-## 4. Structure de Coûts & Marge Brute (Bootstrapping)
+## 4. Structure de Coûts & Marge Brute (Bootstrapping Strict à 0 €)
 - **Outils d'extraction primaire** : 0 € (Docker local, IP machine locale, respect des débits).
-- **Outils de requalification** : 0 € (API INSEE / Annuaire des Entreprises publiques et gratuites).
+- **Outils de requalification légale** : 0 € (API INSEE / Annuaire des Entreprises publiques et gratuites).
 - **Espace Client & Base Interne** : 0 € (Notion plan standard / freemium).
-- **LLM & Synthèse contextuelle** : < 15 € / mois (utilisation ciblée sans boucles infinies).
-- **Marge brute estimée sur la phase MVP** : **> 95%**.
+- **LLM & Synthèse contextuelle** : 0 € (Utilisation exclusive des modèles locaux, quotas freemium et outils intégrés sans surcoût d'API dédié — contrainte de 0 € stricte appliquée).
+- **Scraping approfondi (Firecrawl)** : 0 € (Crédits freemium d'évaluation ; suivi de consommation et barrière anti-dépassement à activer dès l'introduction effective d'appels Firecrawl dans le code de production).
+- **Marge brute estimée sur la phase MVP** : **100%**.
 
 ## 5. Ce qui est Fait vs Ce qui reste à Faire
 - **Fait** : Architecture tarifaire calée, structure de marge validée, formats de pilotes standardisés.

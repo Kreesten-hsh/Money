@@ -6,6 +6,7 @@ import re
 import csv
 import ssl
 import unicodedata
+import argparse
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -173,37 +174,72 @@ def inspect_website(url: str, check_timestamp: str):
             'target_clients_checked_at': check_timestamp
         }
 
-def query_sirene_api(query: str, max_retries: int = 3):
-    """Interroge l'API SIRENE avec gestion du rate-limit (HTTP 429) et exponential backoff."""
+def query_sirene_api(query: str, max_retries: int = 3) -> dict:
+    """Interroge l'API SIRENE avec gestion du rate-limit (HTTP 429) et exponential backoff.
+    Retourne {'error': False, 'results': [...]} en cas de succès,
+    ou {'error': True, 'results': [], 'error_details': ...} en cas d'échec technique.
+    """
     url = f"https://recherche-entreprises.api.gouv.fr/search?q={urllib.parse.quote(query)}&per_page=5"
     req = urllib.request.Request(url, headers={'User-Agent': 'MoneyB2BAgent/3.0'})
+    last_err = ""
     for attempt in range(max_retries):
         try:
             with urllib.request.urlopen(req, timeout=8) as resp:
                 data = json.loads(resp.read().decode())
-                return data.get('results', [])
+                return {'error': False, 'results': data.get('results', [])}
         except urllib.error.HTTPError as e:
+            last_err = f"HTTP {e.code}"
             if e.code == 429:
                 time.sleep(2.0 * (attempt + 1))
                 continue
-            return []
-        except Exception:
-            return []
-    return []
+            return {'error': True, 'results': [], 'error_details': last_err}
+        except Exception as e:
+            last_err = str(e)
+            time.sleep(1.0 * (attempt + 1))
+            continue
+    return {'error': True, 'results': [], 'error_details': last_err or "Timeout / tentatives épuisées"}
 
-def evaluate_sirene_match_with_ambiguity(lead: dict, results: list):
+def evaluate_sirene_match_with_ambiguity(lead: dict, results_payload):
     """
-    Évalue les candidats SIRENE avec détection rigoureuse d'ambiguïté :
+    Évalue les candidats SIRENE avec détection rigoureuse d'ambiguïté, des fermetures et des erreurs techniques :
     - Évaluation multi-critères : nom (40 pts), code postal strict (30 pts), voie/numéro (15 pts), NAF (15 pts).
     - Classement des candidats et mesure du delta avec le 2ème candidat.
+    - Détection explicite de fermeture d'entreprise (company_closed: True).
+    - Gestion explicite des erreurs techniques API (api_error: True).
     - Règle de non-ambiguïté : si le 2ème candidat est proche (score >= 55 et delta < 20), MATCH_UNCERTAIN obligatoire.
     - MATCH_CONFIRMED uniquement si concordance forte (score >= 75) ET absence de candidat concurrent proche (delta >= 20 ou second < 50).
     - Traçabilité complète des scores, deltas, critères concordants et contradictoires.
     """
+    is_api_error = False
+    error_details = ""
+    if isinstance(results_payload, dict):
+        is_api_error = results_payload.get('error', False)
+        error_details = results_payload.get('error_details', '')
+        results = results_payload.get('results', [])
+    else:
+        results = results_payload or []
+
+    if is_api_error:
+        return {
+            'best_candidate': None,
+            'matching_status': 'NO_MATCH',
+            'company_closed': False,
+            'api_error': True,
+            'candidate_selected': 'Échec technique API',
+            'candidate_score': 0,
+            'second_candidate_score': 0,
+            'score_delta': 0,
+            'concordant_criteria': [],
+            'contradictory_criteria': [f"Échec technique API SIRENE : {error_details or 'Erreur réseau/serveur'}"],
+            'decision_reason': 'ÉCHEC TECHNIQUE API — À RE-VÉRIFIER'
+        }
+
     if not results:
         return {
             'best_candidate': None,
             'matching_status': 'NO_MATCH',
+            'company_closed': False,
+            'api_error': False,
             'candidate_selected': 'Aucun',
             'candidate_score': 0,
             'second_candidate_score': 0,
@@ -291,13 +327,15 @@ def evaluate_sirene_match_with_ambiguity(lead: dict, results: list):
         # Statut actif
         is_active = (r.get('etat_administratif') == 'A')
         if not is_active:
-            contradictory.append("Entreprise radiée ou inactive au registre")
+            contradictory.append("Entreprise radiée ou inactive au registre administratif")
 
-        total_score = name_score + cp_score + street_score + naf_score if is_active else 0
+        affinity_score = name_score + cp_score + street_score + naf_score
+        total_score = affinity_score if is_active else 0
 
         scored_candidates.append({
             'candidate': r,
             'total_score': total_score,
+            'affinity_score': affinity_score,
             'name_score': name_score,
             'cp_match': cp_match,
             'naf_valid': naf_valid,
@@ -305,6 +343,27 @@ def evaluate_sirene_match_with_ambiguity(lead: dict, results: list):
             'concordant': concordant,
             'contradictory': contradictory
         })
+
+    # DÉTECTION FORMELLE DES FERMETURES (TÂCHE 5)
+    # Vérification si le candidat concordant principal est radié / inactif
+    candidates_by_affinity = sorted(scored_candidates, key=lambda x: x['affinity_score'], reverse=True)
+    best_affinity = candidates_by_affinity[0]
+    has_strong_active = any(c['total_score'] >= 50 for c in scored_candidates if c['is_active'])
+
+    if not best_affinity['is_active'] and best_affinity['affinity_score'] >= 45 and best_affinity['cp_match'] and not has_strong_active:
+        return {
+            'best_candidate': best_affinity['candidate'],
+            'matching_status': 'NO_MATCH',
+            'company_closed': True,
+            'api_error': False,
+            'candidate_selected': f"{best_affinity['candidate'].get('nom_complet')} (FERMÉE - SIREN: {best_affinity['candidate'].get('siren')})",
+            'candidate_score': best_affinity['affinity_score'],
+            'second_candidate_score': 0,
+            'score_delta': 0,
+            'concordant_criteria': best_affinity['concordant'],
+            'contradictory_criteria': best_affinity['contradictory'],
+            'decision_reason': f"Entreprise radiée ou inactive au registre administratif (SIREN {best_affinity['candidate'].get('siren')})"
+        }
 
     scored_candidates.sort(key=lambda x: x['total_score'], reverse=True)
     best = scored_candidates[0]
@@ -319,6 +378,8 @@ def evaluate_sirene_match_with_ambiguity(lead: dict, results: list):
         return {
             'best_candidate': None,
             'matching_status': 'NO_MATCH',
+            'company_closed': False,
+            'api_error': False,
             'candidate_selected': 'Aucun candidat crédible',
             'candidate_score': best_score,
             'second_candidate_score': second_score,
@@ -337,6 +398,8 @@ def evaluate_sirene_match_with_ambiguity(lead: dict, results: list):
         return {
             'best_candidate': best['candidate'],
             'matching_status': 'MATCH_UNCERTAIN',
+            'company_closed': False,
+            'api_error': False,
             'candidate_selected': f"{best['candidate'].get('nom_complet')} (SIREN: {best['candidate'].get('siren')})",
             'candidate_score': best_score,
             'second_candidate_score': second_score,
@@ -351,6 +414,8 @@ def evaluate_sirene_match_with_ambiguity(lead: dict, results: list):
         return {
             'best_candidate': best['candidate'],
             'matching_status': 'MATCH_CONFIRMED',
+            'company_closed': False,
+            'api_error': False,
             'candidate_selected': f"{best['candidate'].get('nom_complet')} (SIREN: {best['candidate'].get('siren')})",
             'candidate_score': best_score,
             'second_candidate_score': second_score,
@@ -365,6 +430,8 @@ def evaluate_sirene_match_with_ambiguity(lead: dict, results: list):
         return {
             'best_candidate': best['candidate'],
             'matching_status': 'MATCH_PLAUSIBLE',
+            'company_closed': False,
+            'api_error': False,
             'candidate_selected': f"{best['candidate'].get('nom_complet')} (SIREN: {best['candidate'].get('siren')})",
             'candidate_score': best_score,
             'second_candidate_score': second_score,
@@ -378,6 +445,8 @@ def evaluate_sirene_match_with_ambiguity(lead: dict, results: list):
     return {
         'best_candidate': best['candidate'],
         'matching_status': 'MATCH_UNCERTAIN',
+        'company_closed': False,
+        'api_error': False,
         'candidate_selected': f"{best['candidate'].get('nom_complet')} (SIREN: {best['candidate'].get('siren')})",
         'candidate_score': best_score,
         'second_candidate_score': second_score,
@@ -399,6 +468,16 @@ def calculate_scores(lead: dict, sirene_eval: dict, sirene_data: dict, site_info
     tranche = sirene_data.get('tranche_code')
     dirigeants = sirene_data.get('dirigeants', [])
     site_accessible = site_info['accessible']
+
+    # Exclusion immédiate des structures fermées / radiées (TÂCHE 5)
+    if sirene_eval.get('company_closed') or (sirene_data.get('found') and sirene_data.get('etat_administratif') not in ('A', None)):
+        status = 'DISQUALIFIED'
+        reasons = [
+            f"Lead Gen (0/100) : Entreprise fermée / radiée au registre officiel (SIREN: {sirene_data.get('siren') or 'Inconnu'})",
+            "GW (0/100) : Neutralisé (Option B : absence d'audit éditorial public LinkedIn)",
+            f"Confidence (0/100) : Structure fermée ou inactive (Statut administratif: {sirene_data.get('etat_administratif')})"
+        ]
+        return 0, 0, 0, status, reasons
 
     # Exclusion immédiate des structures hors ICP (0 salarié ou > 20 salariés)
     tranches_hors_cible = ('NN', '00', '12', '21', '22', '31', '32', '41', '42', '51', '52')
@@ -510,15 +589,23 @@ def calculate_scores(lead: dict, sirene_eval: dict, sirene_data: dict, site_info
     return lead_gen_score, ghostwriting_score, confidence_score, status, reasons
 
 def main():
+    parser = argparse.ArgumentParser(description="Requalification approfondie des leads B2B (API Recherche Entreprises & Audit Web)")
+    parser.add_argument('--offset', type=int, default=0, help="Index de départ dans la shortlist (défaut: 0)")
+    parser.add_argument('--limit', type=int, default=30, help="Nombre de leads à qualifier (défaut: 30)")
+    args = parser.parse_args()
+
     shortlist_file = BASE_DIR / 'data' / 'gmaps_agences_web_shortlist.csv'
     if not shortlist_file.exists():
         raise FileNotFoundError(f"Fichier de shortlist introuvable : {shortlist_file}. Exécutez dedupe_and_shortlist.py en amont.")
 
     with open(shortlist_file, 'r', encoding='utf-8') as f:
         reader = csv.DictReader(f)
-        leads = list(reader)[:30]
+        all_leads = list(reader)
 
-    print(f"Requalification approfondie de {len(leads)} leads avec vérification structurée des preuves...")
+    leads = all_leads[args.offset : args.offset + args.limit]
+    total_leads = len(leads)
+
+    print(f"Requalification approfondie de {total_leads} leads (offset {args.offset}, limit {args.limit}) avec vérification structurée des preuves...")
 
     requalified_leads = []
 
@@ -527,20 +614,25 @@ def main():
         city = lead.get('city')
         now_iso = get_current_iso_timestamp()
 
-        print(f"[{i:02d}/30] Requalification SIRENE & Audit Web : {name} ({city})...")
+        print(f"[{i:02d}/{total_leads}] Requalification SIRENE & Audit Web : {name} ({city})...")
 
         # 1. Audit HTTP réel avec preuves séparées pour offre et clientèle cible
         site_info = inspect_website(lead.get('website'), now_iso)
         time.sleep(0.3)
 
-        # 2. Interrogation SIRENE et évaluation avec détection d'ambiguïté
+        # 2. Interrogation SIRENE et évaluation avec détection d'ambiguïté et gestion d'erreurs
         clean_name = clean_company_name(name)
-        sirene_results = query_sirene_api(f"{clean_name} {city}")
-        if not sirene_results:
-            sirene_results = query_sirene_api(clean_name)
+        sirene_payload = query_sirene_api(f"{clean_name} {city}")
+        api_error = sirene_payload.get('error', False)
+        sirene_results = sirene_payload.get('results', [])
+
+        if not sirene_results and not api_error:
+            sirene_payload = query_sirene_api(clean_name)
+            api_error = sirene_payload.get('error', False)
+            sirene_results = sirene_payload.get('results', [])
         time.sleep(0.5)
 
-        sirene_eval = evaluate_sirene_match_with_ambiguity(lead, sirene_results)
+        sirene_eval = evaluate_sirene_match_with_ambiguity(lead, sirene_payload)
         best_cand = sirene_eval['best_candidate']
 
         if best_cand:
@@ -629,14 +721,17 @@ def main():
             decision_maker_source = ''
             decision_maker_checked_at = now_iso
 
-        notes_parts = [
-            f"Matching SIRENE : {sirene_eval['matching_status']} ({sirene_eval['decision_reason']})",
-            f"SIREN : {sirene_data.get('siren') or 'Non trouvé'}",
-            f"Tranche : {sirene_data.get('tranche_label')}"
-        ]
-        if not site_info['accessible']:
-            notes_parts.append("site inaccessible")
-        notes = " | ".join(notes_parts)
+        if sirene_eval.get('api_error'):
+            notes = "ÉCHEC TECHNIQUE API — À RE-VÉRIFIER"
+        else:
+            notes_parts = [
+                f"Matching SIRENE : {sirene_eval['matching_status']} ({sirene_eval['decision_reason']})",
+                f"SIREN : {sirene_data.get('siren') or 'Non trouvé'}",
+                f"Tranche : {sirene_data.get('tranche_label')}"
+            ]
+            if not site_info['accessible']:
+                notes_parts.append("site inaccessible")
+            notes = " | ".join(notes_parts)
 
         item = {
             'company_name': sirene_data.get('nom_complet') or lead.get('title'),
@@ -719,6 +814,15 @@ def main():
         st = l['verification_status']
         statuses[st] = statuses.get(st, 0) + 1
     print("Répartition des statuts finaux réels :", statuses)
+
+    # Résumé des erreurs techniques API (TÂCHE 4)
+    tech_errors = [l for l in requalified_leads if l.get('notes') == 'ÉCHEC TECHNIQUE API — À RE-VÉRIFIER' or 'ÉCHEC TECHNIQUE API' in l.get('notes', '')]
+    if tech_errors:
+        print(f"\n⚠️  ALERTE TECHNIQUE : {len(tech_errors)} lead(s) touché(s) par un échec technique API SIRENE à re-traiter séparément :")
+        for te in tech_errors:
+            print(f"  - {te.get('brand_name')} ({te.get('city')})")
+    else:
+        print("\n✅ Aucune erreur technique API SIRENE rencontrée lors de l'exécution.")
 
 if __name__ == '__main__':
     main()

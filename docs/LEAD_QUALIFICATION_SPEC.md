@@ -6,7 +6,7 @@ Chaque prospect progresse à travers 5 statuts stricts :
 1. **CANDIDATE** : Entité brute issue du sourcing Google Maps. Aucune vérification administrative ni technique effectuée.
 2. **REQUIRES REVIEW** : Entité présentant une incertitude critique (ex: tranche `01` sans preuve secondaire de 2 personnes, matching SIRENE incertain ou ambigu avec delta < 20, dirigeant non identifié). `confidence_score` plafonné à **60/100** (et **40/100** si matching incertain ou absent).
 3. **PARTIALLY VERIFIED** : Entité dont l'effectif ICP est certifié (tranches 02, 03, 11) et légalement identifiée (`MATCH_CONFIRMED` ou `MATCH_PLAUSIBLE`) avec site accessible, mais données incomplètes ou contact direct manquant. `confidence_score` plafonné à **60/100**.
-4. **VERIFIED** : Entité dont l'immatriculation légale est confirmée sans ambiguïté (`MATCH_CONFIRMED`), la taille strictement de 2 à 20 personnes certifiée (avec co-gérance pour tranche 01), le dirigeant officiel extrait du registre (`qualite` au RCS) et le site HTTPS 200 sont vérifiés avec preuves indépendantes. `confidence_score` $\ge$ **80/100**.
+4. **VERIFIED** : Entité dont l'immatriculation légale est confirmée sans ambiguïté (`MATCH_CONFIRMED`), la taille strictement de 2 à 20 personnes certifiée (avec co-gérance pour tranche 01), le dirigeant officiel extrait du registre (`qualite` au RCS) et le site HTTPS 200 sont vérifiés avec preuves indépendantes. `confidence_score` ≥ **80/100**.
 5. **DISQUALIFIED** : Entité hors ICP (0 salarié `NN`/`00`, effectif > 20, boîte fermée, fausse agence). `confidence_score` forcé à **0/100**.
 
 ---
@@ -20,9 +20,9 @@ Le rapprochement entre l'entité commerciale observée et le registre national d
 
 ### Règle de Non-Ambiguïté (Delta Écart) :
 Un score élevé ne suffit pas à certifier un rapprochement. L'algorithme mesure systématiquement l'écart entre le meilleur candidat et le deuxième candidat le plus proche :
-- **`MATCH_CONFIRMED`** : Score $\ge$ 75, code postal strict validé, NAF éligible, ET absence de candidat concurrent proche ($\text{Delta} \ge 20$ ou score du 2ème candidat $< 50$).
+- **`MATCH_CONFIRMED`** : Score ≥ 75, code postal strict validé, NAF éligible, ET absence de candidat concurrent proche (delta ≥ 20 ou score du 2ème candidat < 50).
 - **`MATCH_PLAUSIBLE`** : Score entre 50 et 74, localisation concordante, mais absence de validation de voie ou nom commercial non déposé.
-- **`MATCH_UNCERTAIN`** : Déclenché dès qu'un 2ème candidat concurrent obtient un score $\ge 55$ avec un $\text{Delta} < 20$, ou si le score global est $< 50$.
+- **`MATCH_UNCERTAIN`** : Déclenché dès qu'un 2ème candidat concurrent obtient un score ≥ 55 avec un delta < 20, ou si le score global est < 50.
 - **`NO_MATCH`** : Aucune concordance territoriale ou société inactive.
 
 Tout lead en `MATCH_UNCERTAIN` ou `NO_MATCH` est strictement inéligible au statut `VERIFIED`.
@@ -41,7 +41,7 @@ Mesure l'adéquation opérationnelle pour l'offre *AI Lead Intelligence* selon 4
   - 10 pts si 1-2 pers sans preuve secondaire
   - 0 pt si hors cible (`NN`, `00`, `>20`)
 - **Signal d'affaires externe actif (max 25 pts)** : Fait d'actualité, recrutement ou expansion public prouvé avec URL source et date vérifiée. En Phase 1, aucun signal externe n'étant inventé ni recyclé depuis les avis Google, cette composante est à **0 pt** (pénalité de 25 points documentée, score max effectif = **75/100**).
-- **Visibilité commerciale & Traction (max 20 pts)** : 20 pts si note $\ge 4.8$ et $\ge 20$ avis Google, 15 pts si note $\ge 4.5$, 10 pts sinon.
+- **Visibilité commerciale & Traction (max 20 pts)** : 20 pts si note ≥ 4.8 et ≥ 20 avis Google, 15 pts si note ≥ 4.5, 10 pts sinon.
 
 ### B. GHOSTWRITING_SCORE (Sur 100 points)
 - **Statut en phase actuelle** : **Neutralisé à 0/100 (Option B)**.

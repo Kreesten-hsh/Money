@@ -5,21 +5,6 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent
 
-# Cohorte officielle de référence (30 agences représentatives des 6 métropoles clés)
-BENCHMARK_COHORT_DOMAINS = [
-    # Métropole Marseille (5)
-    'lacky.fr', 'boosteo-marseille.fr', 'simplement.me', '13enweb.fr', 'mycreateurdesite.fr',
-    # Métropole Paris (5)
-    '4beez.agency', 'youdemus.fr', 'agence-web-paris.com', 'bew-web-agency.fr', 'wedezign.fr',
-    # Métropole Lyon (5)
-    'evolyon.fr', 'webylab.fr', 'sw-siteinternet.com', 'agence-webcore.com', 'netcommeweb.fr',
-    # Métropole Toulouse (6)
-    'mashvp.com', 'agoralys.com', 'kwalt-digital.com', 'dcvo.studio', 'hdigiweb.com', 'uniweb-toulouse.fr',
-    # Métropole Bordeaux (5)
-    'webtribe-studio.com', 'appalga.com', 'ideclap.fr', 'ideveloppement.fr', 'kwantic.fr',
-    # Métropole Nantes (4)
-    'web-studio.fr', 'fair-agenceweb.fr', 'latelier-conceptionweb.com', 'ae2agence.com'
-]
 
 def normalize_phone(phone: str) -> str:
     """Normalise un numéro de téléphone français pour comparaison stricte."""
@@ -119,23 +104,16 @@ def dedupe_and_shortlist():
 
         shortlisted.append(row)
 
-    # Ordonnancement déterministe :
-    # 1. Cohorte de référence benchmark (30 leads documentés) en tête de liste
-    # 2. Reste du vivier trié par volume d'avis DESC, note DESC, titre ASC
-    benchmark_map = {extract_domain(r['website']): r for r in shortlisted}
-    benchmark_rows = [benchmark_map[d] for d in BENCHMARK_COHORT_DOMAINS if d in benchmark_map]
-    
-    remaining_rows = [r for r in shortlisted if extract_domain(r['website']) not in BENCHMARK_COHORT_DOMAINS]
-    remaining_rows.sort(
+    # Ordonnancement objectif et déterministe :
+    # Tri par volume d'avis DESC, note DESC, titre ASC
+    shortlisted.sort(
         key=lambda x: (
-            int(float(x.get('review_count', 0) or 0)),
-            float(x.get('review_rating', 0) or 0),
-            x.get('title', '')
-        ),
-        reverse=True
+            -int(float(x.get('review_count', 0) or 0)),
+            -float(x.get('review_rating', 0) or 0),
+            (x.get('title', '') or '').strip().lower()
+        )
     )
-
-    final_shortlist = benchmark_rows + remaining_rows
+    final_shortlist = shortlisted
 
     if final_shortlist:
         fieldnames = list(final_shortlist[0].keys())
@@ -145,7 +123,6 @@ def dedupe_and_shortlist():
             writer.writerows(final_shortlist)
 
     print(f"Shortlist générée avec succès : {len(final_shortlist)} agences qualifiées.")
-    print(f"Cohorte de référence documentée : {len(benchmark_rows)} agences en tête de fichier.")
     print(f"Statistiques de rejets : {discarded_stats}")
     return final_shortlist
 
