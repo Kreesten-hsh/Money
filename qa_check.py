@@ -534,6 +534,36 @@ def run_qa_checks(csv_path: Path = None, json_path: Path = None, md_path: Path =
                 c24.append(f"Ligne {idx:02d} [{l.get('brand_name')}]: Fuite MCP staging dans company_size_code ('{l.get('company_size_code')}').")
     record_check("Contrôle 24 (Étanchéité Staging MCP vs Registre Légal)", c24)
 
+    # 25. Absence d'Erreurs Techniques MCP dans les Données (Filet de Sécurité Anti-Régression)
+    c25 = []
+    banned_mcp_error_patterns = [
+        "error executing tool",
+        "the main browser is not open",
+        "the main browser did not start",
+        "requires xvfb",
+        "browser.newpage: no response in",
+        "mcp_tool_error",
+        "engine_not_ready"
+    ]
+    monitored_fields = [
+        "main_offer",
+        "target_clients",
+        "decision_maker_linkedin_activity",
+        "notes",
+        "reasons_lead_gen",
+        "reasons_gw",
+        "reasons_confidence"
+    ]
+
+    for idx, l in enumerate(leads, 1):
+        clean_name = l.get('brand_name', '').split('|')[0].strip()
+        for field in monitored_fields:
+            val = str(l.get(field, '')).strip().lower()
+            for pattern in banned_mcp_error_patterns:
+                if pattern in val:
+                    c25.append(f"Ligne {idx:02d} [{clean_name}]: Champ '{field}' contient un message d'erreur MCP non filtré : '{pattern}'.")
+    record_check("Contrôle 25 (Absence d'Erreurs Techniques MCP dans les Données)", c25)
+
     all_passed = all(results.values())
     return all_passed, results, failures
 
@@ -696,13 +726,20 @@ def run_negative_tests() -> Tuple[bool, int, int]:
             }),
             "expected_fail": "Contrôle 23 (Preuve & Auditabilité Empreinte CMS)"
         },
-        # ÉTANCHÉITÉ MCP STAGING (Contrôle 24)
+        # ÉTANCHÉITÉ MCP STAGING & ERREURS TECHNIQUES (Contrôles 24 & 25)
         {
             "name": "MCP 1 : Valeur issue du staging MCP ayant fuité dans decision_maker légal",
             "modify": lambda rows: rows[0].update({
                 "decision_maker": "Création de sites web vitrines et e-commerce sur-mesure"
             }),
             "expected_fail": "Contrôle 24 (Étanchéité Staging MCP vs Registre Légal)"
+        },
+        {
+            "name": "MCP 2 : Erreur technique MCP injectée dans main_offer",
+            "modify": lambda rows: rows[0].update({
+                "main_offer": "Error executing tool browser_read_text: the main browser is not open."
+            }),
+            "expected_fail": "Contrôle 25 (Absence d'Erreurs Techniques MCP dans les Données)"
         }
     ]
 
@@ -778,7 +815,7 @@ def run_negative_tests() -> Tuple[bool, int, int]:
     return all_passed, passed_count, total_count
 
 if __name__ == '__main__':
-    print("=== DÉMARRAGE AUDIT QA OFFICIEL (24 CONTRÔLES MÉTIER) ===")
+    print("=== DÉMARRAGE AUDIT QA OFFICIEL (25 CONTRÔLES MÉTIER) ===")
     passed, results, failures = run_qa_checks()
 
     for check_name, check_ok in results.items():
@@ -789,7 +826,7 @@ if __name__ == '__main__':
                 print(f"       -> {fail_msg}")
 
     print("-" * 50)
-    print(f"Bilan Dataset Réel : {sum(results.values())}/24 CONTRÔLES VALIDÉS.")
+    print(f"Bilan Dataset Réel : {sum(results.values())}/25 CONTRÔLES VALIDÉS.")
 
     neg_ok, neg_passed, neg_total = run_negative_tests()
     print("-" * 50)

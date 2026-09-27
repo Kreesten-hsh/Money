@@ -213,14 +213,64 @@ class TestV2ArchitectureBehavioral(unittest.TestCase):
         self.assertIn(res.status, (ProviderStatus.SUCCESS, ProviderStatus.NO_RESULT, ProviderStatus.BLOCKED, ProviderStatus.NETWORK_ERROR, ProviderStatus.TIMEOUT, ProviderStatus.UNKNOWN_ERROR))
 
     def test_12_mcp_playwright_client_isolation(self):
-        """InvisiblePlaywrightProvider vérifie la disponibilité de uv et s'exécute en subprocess sans import direct."""
+        """InvisiblePlaywrightProvider vérifie uv et mcp_playwright_client rejette strictement is_error=True."""
+        import asyncio
         import shutil
+        from unittest.mock import AsyncMock, MagicMock, patch
+        from mcp_playwright_client import check_tool_result_error, execute_mcp_inspection
+
+        # 1. Vérification de disponibilité uv
         prov = InvisiblePlaywrightProvider()
         has_uv = bool(shutil.which("uv"))
         self.assertEqual(prov.is_available(), has_uv)
-        if not has_uv:
-            res = prov.execute("https://example.com", {"trigger_type": "annuaire_fallback"})
-            self.assertEqual(res.status, ProviderStatus.TOOL_MISSING)
+
+        # 2. Vérification unitaire check_tool_result_error
+        mock_ok = MagicMock()
+        mock_ok.is_error = False
+        text_block = MagicMock()
+        text_block.type = "text"
+        text_block.text = "Example Domain Content"
+        mock_ok.content = [text_block]
+        is_err, msg = check_tool_result_error(mock_ok)
+        self.assertFalse(is_err)
+
+        mock_fail = MagicMock()
+        mock_fail.is_error = True
+        err_block = MagicMock()
+        err_block.type = "text"
+        err_block.text = "Navigation timed out or refused"
+        mock_fail.content = [err_block]
+        is_err, msg = check_tool_result_error(mock_fail)
+        self.assertTrue(is_err)
+        self.assertEqual(msg, "Navigation timed out or refused")
+
+        # 3. Test unitaire d'interruption sur browser_navigate avec is_error=True
+        async def run_mocked_nav_failure():
+            mock_session = AsyncMock()
+            mock_open = MagicMock()
+            mock_open.is_error = False
+            mock_open.content = [MagicMock(type="text", text="browser open OK")]
+
+            mock_nav = MagicMock()
+            mock_nav.is_error = True
+            mock_nav.content = [MagicMock(type="text", text="Error: 404 Not Found")]
+
+            mock_session.call_tool.side_effect = [mock_open, mock_nav, MagicMock()]
+
+            with patch("mcp.client.stdio.stdio_client") as mock_stdio:
+                mock_ctx = AsyncMock()
+                mock_ctx.__aenter__.return_value = (MagicMock(), MagicMock())
+                mock_stdio.return_value = mock_ctx
+                with patch("mcp.ClientSession") as mock_cls:
+                    mock_cls.return_value.__aenter__.return_value = mock_session
+                    res = await execute_mcp_inspection("https://fail.com", "annuaire_fallback", 10.0)
+                    return res
+
+        res_fail = asyncio.run(run_mocked_nav_failure())
+        self.assertEqual(res_fail["status"], "MCP_TOOL_ERROR")
+        self.assertEqual(res_fail["failed_step"], "browser_navigate")
+        self.assertIn("404 Not Found", res_fail["error_detail"])
+        self.assertNotIn("text", res_fail)
 
     def test_13_api_provider_unavailable(self):
         """Une API distante indisponible retourne NETWORK_ERROR."""

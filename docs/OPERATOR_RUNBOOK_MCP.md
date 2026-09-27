@@ -21,7 +21,7 @@ L'outil `invisible_playwright_mcp` est un serveur MCP officiel (créé par `fede
 >   ```
 >   *En l'absence de `Xvfb`, le serveur MCP signale : `invisible_playwright headless=True requires Xvfb. Install it: sudo apt install xvfb`.*  
 >   *(Note technique : la variable d'environnement `INVPW_TRUE_HEADLESS=1` permet d'activer le mode headless natif sans Xvfb).*
-> - **Procédure de premier lancement** : Le binaire Firefox patché (~250 Mo) n'est pas embarqué à l'installation. Il doit être téléchargé une première fois via la commande :
+> - **Prérequis obligatoire avant tout premier lancement** : Le binaire Firefox patché (~250 Mo) n'est pas embarqué à l'installation. Il DOIT obligatoirement être téléchargé une première fois avant toute exécution de pipeline via la commande :
 >   ```bash
 >   uvx invisible-playwright fetch
 >   ```

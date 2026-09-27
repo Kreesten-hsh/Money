@@ -47,6 +47,34 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+def check_tool_result_error(result: Any) -> tuple[bool, str]:
+    """
+    Extrait l'état d'erreur d'un CallToolResult MCP.
+    Prend en compte is_error et isError (selon conventions pydantic/MCP),
+    ainsi que les patterns d'erreurs textuelles retournées par le serveur.
+    """
+    if result is None:
+        return True, "No response returned from MCP tool"
+
+    is_err = bool(getattr(result, "is_error", getattr(result, "isError", False)))
+    
+    extracted_text = ""
+    if getattr(result, "content", None):
+        for block in result.content:
+            if getattr(block, "type", "") == "text":
+                extracted_text += getattr(block, "text", "")
+
+    if is_err:
+        return True, extracted_text.strip() or "Tool indicated error with no text"
+    
+    # Filet de sécurité supplémentaire : détecter les messages d'erreur textuels de premier niveau
+    lower_text = extracted_text.lower()
+    if lower_text.startswith("error executing tool") or "did not start:" in lower_text:
+        return True, extracted_text.strip()
+
+    return False, extracted_text
+
+
 async def execute_mcp_inspection(
     url: str,
     trigger_type: str,
@@ -78,56 +106,124 @@ async def execute_mcp_inspection(
         async with ClientSession(read_stream, write_stream) as session:
             await session.initialize()
 
-            # 1. Ouverture du navigateur furtif Firefox
-            await session.call_tool("browser_open", arguments={"browser": "main"})
-            result_payload["mcp_tools_used"].append("browser_open")
+            browser_opened = False
 
-            try:
-                # 2. Navigation furtive
-                nav_args = {"url": url, "wait_until": "domcontentloaded", "browser": "main"}
-                await session.call_tool("browser_navigate", arguments=nav_args)
-                result_payload["mcp_tools_used"].append("browser_navigate")
+            async def safe_close_browser() -> None:
+                nonlocal browser_opened
+                if browser_opened:
+                    try:
+                        await session.call_tool("browser_close", arguments={"browser": "main"})
+                    except Exception:
+                        pass
+                    browser_opened = False
 
-                # 3. Lecture du texte visible de la page
-                read_args = {"selector": "body", "max_chars": 6000, "browser": "main"}
-                read_res = await session.call_tool("browser_read_text", arguments=read_args)
-                result_payload["mcp_tools_used"].append("browser_read_text")
+            # 1. Ouverture du navigateur furtif Firefox avec retry si téléchargement en cours
+            open_res = None
+            max_open_retries = 3
+            download_patterns = [
+                "download is starting",
+                "not on this machine yet",
+                "downloading now",
+                "is being downloaded",
+                "is being verified",
+                "takes a minute or two"
+            ]
 
-                page_text = ""
-                if read_res and read_res.content:
-                    for block in read_res.content:
-                        if getattr(block, "type", "") == "text":
-                            page_text += block.text
+            for attempt in range(max_open_retries + 1):
+                open_res = await session.call_tool("browser_open", arguments={"browser": "main"})
+                is_err, err_text = check_tool_result_error(open_res)
+                if not is_err:
+                    browser_opened = True
+                    result_payload["mcp_tools_used"].append("browser_open")
+                    break
 
-                result_payload["text"] = page_text
+                # Si le message indique un téléchargement du moteur en cours
+                if any(p in err_text.lower() for p in download_patterns):
+                    if attempt < max_open_retries:
+                        await asyncio.sleep(5)
+                        continue
+                    else:
+                        await safe_close_browser()
+                        return {
+                            "status": "ENGINE_NOT_READY",
+                            "failed_step": "browser_open",
+                            "error_detail": err_text,
+                            "url": url
+                        }
 
-                # 4. Snapshot (structure interactive et titre)
-                try:
-                    snap_res = await session.call_tool("browser_snapshot", arguments={"browser": "main"})
-                    result_payload["mcp_tools_used"].append("browser_snapshot")
-                    if snap_res and snap_res.content:
-                        for block in snap_res.content:
-                            if getattr(block, "type", "") == "text":
-                                match_title = re.search(r"Title:\s*(.+)", block.text)
-                                if match_title:
-                                    result_payload["title"] = match_title.group(1).strip()
-                except Exception:
-                    pass
+                # Autre erreur immédiate sur browser_open
+                await safe_close_browser()
+                return {
+                    "status": "MCP_TOOL_ERROR",
+                    "failed_step": "browser_open",
+                    "error_detail": err_text,
+                    "url": url
+                }
 
-            finally:
-                # 5. Fermeture propre et garantie du navigateur
-                try:
-                    await session.call_tool("browser_close", arguments={"browser": "main"})
-                    result_payload["mcp_tools_used"].append("browser_close")
-                except Exception:
-                    pass
+            # 2. Navigation furtive
+            nav_args = {"url": url, "wait_until": "domcontentloaded", "browser": "main"}
+            nav_res = await session.call_tool("browser_navigate", arguments=nav_args)
+            result_payload["mcp_tools_used"].append("browser_navigate")
+            is_err, err_text = check_tool_result_error(nav_res)
+            if is_err:
+                await safe_close_browser()
+                return {
+                    "status": "MCP_TOOL_ERROR",
+                    "failed_step": "browser_navigate",
+                    "error_detail": err_text,
+                    "url": url
+                }
+
+            # 3. Lecture du texte visible de la page
+            read_args = {"selector": "body", "max_chars": 6000, "browser": "main"}
+            read_res = await session.call_tool("browser_read_text", arguments=read_args)
+            result_payload["mcp_tools_used"].append("browser_read_text")
+            is_err, err_text = check_tool_result_error(read_res)
+            if is_err:
+                await safe_close_browser()
+                return {
+                    "status": "MCP_TOOL_ERROR",
+                    "failed_step": "browser_read_text",
+                    "error_detail": err_text,
+                    "url": url
+                }
+
+            page_text = ""
+            if getattr(read_res, "content", None):
+                for block in read_res.content:
+                    if getattr(block, "type", "") == "text":
+                        page_text += getattr(block, "text", "")
+            result_payload["text"] = page_text
+
+            # 4. Snapshot (structure interactive et titre)
+            snap_res = await session.call_tool("browser_snapshot", arguments={"browser": "main"})
+            result_payload["mcp_tools_used"].append("browser_snapshot")
+            is_err, err_text = check_tool_result_error(snap_res)
+            if is_err:
+                await safe_close_browser()
+                return {
+                    "status": "MCP_TOOL_ERROR",
+                    "failed_step": "browser_snapshot",
+                    "error_detail": err_text,
+                    "url": url
+                }
+
+            if getattr(snap_res, "content", None):
+                for block in snap_res.content:
+                    if getattr(block, "type", "") == "text":
+                        match_title = re.search(r"Title:\s*(.+)", getattr(block, "text", ""))
+                        if match_title:
+                            result_payload["title"] = match_title.group(1).strip()
+
+            # 5. Fermeture propre et garantie du navigateur
+            await safe_close_browser()
+            result_payload["mcp_tools_used"].append("browser_close")
 
             # Analyse spécifique selon trigger_type
             if trigger_type == "linkedin_consultation":
                 has_activity = bool(re.search(r"(activité|posts|articles|publications|expérience|fondateur)", page_text, re.IGNORECASE))
                 result_payload["has_recent_activity"] = has_activity
             else:
-                # Extraction emails et indices d'offres
                 email_regex = re.compile(r"[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+")
                 emails = list(set(email_regex.findall(page_text)))
                 result_payload["extracted_emails"] = emails

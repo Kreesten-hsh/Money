@@ -165,8 +165,26 @@ class InvisiblePlaywrightProvider(BaseProvider):
             return ProviderResult(provider=self.name, status=ProviderStatus.TIMEOUT, evidences=[], raw_payload=json_payload)
         elif status_str in ("BLOCKED", "RATE_LIMITED"):
             return ProviderResult(provider=self.name, status=ProviderStatus[status_str], evidences=[], raw_payload=json_payload)
+        elif status_str in ("MCP_TOOL_ERROR", "ENGINE_NOT_READY"):
+            return ProviderResult(provider=self.name, status=ProviderStatus.TOOL_UNAVAILABLE, evidences=[], raw_payload=json_payload)
         elif status_str != "SUCCESS":
             return ProviderResult(provider=self.name, status=ProviderStatus.NETWORK_ERROR, evidences=[], raw_payload=json_payload)
+
+        # Filet de sécurité défensif : interdire formellement tout texte d'erreur MCP déguisé en succès
+        extracted_text = str(json_payload.get("text", "")).lower()
+        if any(err_pat in extracted_text for err_pat in [
+            "error executing tool",
+            "the main browser is not open",
+            "the main browser did not start",
+            "requires xvfb",
+            "browser.newpage: no response in"
+        ]):
+            return ProviderResult(
+                provider=self.name,
+                status=ProviderStatus.TOOL_UNAVAILABLE,
+                evidences=[],
+                raw_payload={"error": "Erreur système MCP détectée dans le payload textuel", "json": json_payload}
+            )
 
         # Construction des évidences
         evidences: List[Evidence] = []
