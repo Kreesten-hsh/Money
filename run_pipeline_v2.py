@@ -34,6 +34,8 @@ def parse_args():
     parser = argparse.ArgumentParser(description="Pipeline Unifié Money V2.2 (AI Lead Intelligence + Ghostwriting)")
     parser.add_argument("--offset", type=int, default=0, help="Offset dans le lot")
     parser.add_argument("--limit", type=int, default=30, help="Nombre de leads à traiter")
+    parser.add_argument("--sirens", type=str, default=None, help="Liste de SIREN séparés par des virgules à traiter prioritairement")
+    parser.add_argument("--top5-verified", action="store_true", help="Traiter spécifiquement les 5 premiers leads vérifiés (Top 5 qualifiés)")
     parser.add_argument("--input", type=str, default=str(project_root / "data" / "top30_leads_requalified.json"), help="Fichier JSON d'entrée")
     parser.add_argument("--raw-csv", type=str, default=None, help="Optionnel : fichier brut Google Maps pour découverte complète")
     parser.add_argument("--output", type=str, default=str(project_root / "data" / "v2_processed_leads.json"), help="Fichier JSON de sortie")
@@ -141,10 +143,30 @@ def main():
         with open(in_path, "r", encoding="utf-8") as f:
             all_leads = json.load(f)
 
-        batch_to_process = all_leads[args.offset:args.offset + args.limit]
-        print(f"Chargement de {len(all_leads)} leads (Traitement batch offset {args.offset} à {args.offset + args.limit})")
-        processed_batch, evidences = pipeline.process_batch(batch_to_process)
-        all_leads[args.offset:args.offset + args.limit] = processed_batch
+        if args.sirens:
+            target_sirens = set(s.strip() for s in args.sirens.split(",") if s.strip())
+            indices = [i for i, l in enumerate(all_leads) if l.get("siren") in target_sirens]
+            batch_to_process = [all_leads[i] for i in indices]
+            print(f"Chargement de {len(all_leads)} leads (Traitement ciblé de {len(batch_to_process)} leads par SIREN)")
+            processed_batch, evidences = pipeline.process_batch(batch_to_process)
+            for idx, p_lead in zip(indices, processed_batch):
+                all_leads[idx] = p_lead
+        elif args.top5_verified:
+            # Sélection des 5 premiers leads VERIFIED
+            indices = [
+                i for i, l in enumerate(all_leads)
+                if l.get("verification_status") == "VERIFIED" and l.get("matching_status") == "MATCH_CONFIRMED"
+            ][:5]
+            batch_to_process = [all_leads[i] for i in indices]
+            print(f"Chargement de {len(all_leads)} leads (Traitement ciblé des {len(batch_to_process)} leads VERIFIED du Top 5)")
+            processed_batch, evidences = pipeline.process_batch(batch_to_process)
+            for idx, p_lead in zip(indices, processed_batch):
+                all_leads[idx] = p_lead
+        else:
+            batch_to_process = all_leads[args.offset:args.offset + args.limit]
+            print(f"Chargement de {len(all_leads)} leads (Traitement batch offset {args.offset} à {args.offset + args.limit})")
+            processed_batch, evidences = pipeline.process_batch(batch_to_process)
+            all_leads[args.offset:args.offset + args.limit] = processed_batch
 
     # Sauvegarde JSON
     out_json = Path(args.output)
@@ -175,7 +197,7 @@ def main():
     # Contrôle QA automatique
     if not args.skip_qa:
         print("\n" + "=" * 70)
-        print("EXÉCUTION DU CONTRÔLE QA OFFICIEL (24 CONTRÔLES MÉTIER)")
+        print("EXÉCUTION DU CONTRÔLE QA OFFICIEL (25 CONTRÔLES MÉTIER)")
         print("=" * 70)
         qa_proc = subprocess.run([sys.executable, str(project_root / "qa_check.py")], check=False)
         if qa_proc.returncode != 0:
