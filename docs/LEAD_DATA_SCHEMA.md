@@ -32,6 +32,7 @@ Chaque enregistrement du dataset de prospection doit respecter strictement les a
 | `target_clients_checked_at` | string (ISO 8601) | OUI | Horodatage dynamique UTC de l'audit de la cible |
 | `decision_maker` | string | OUI | Nom complet du dirigeant officiel ou dénomination de la personne morale présidente |
 | `decision_maker_role` | string | OUI | Rôle officiel exact extrait de l'attribut `qualite` SIRENE (ex: `Gérant`, `Président de SAS`, `Directeur Général`) |
+| `decision_maker_is_person` | boolean | OUI | `True` si le décisionnaire retenu est une personne physique, `False` si personne morale ou non identifié |
 | `decision_maker_source` | string (URL) | NON | URL officielle prouvant l'identité légale (Annuaire des Entreprises) |
 | `decision_maker_checked_at` | string (ISO 8601) | OUI | Horodatage dynamique UTC de l'extraction du dirigeant |
 | `public_professional_email` | string | NON | Email professionnel public (ex: `Non extrait (Option)`) |

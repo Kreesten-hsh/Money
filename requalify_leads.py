@@ -639,13 +639,35 @@ def main():
             siren = best_cand.get('siren')
             tranche = best_cand.get('tranche_effectif_salarie')
             
-            # Extraction des dirigeants avec qualification officielle exacte
+            # Extraction des dirigeants avec qualification officielle exacte et filtrage strict
             dirigeants = []
             for d in best_cand.get('dirigeants', []):
-                person_name = f"{d.get('prenoms', '')} {d.get('nom', '')}".strip() if d.get('nom') else (d.get('denomination') or '')
-                role_exact = d.get('qualite') or 'Dirigeant déclaré'
+                role_exact = (d.get('qualite') or 'Dirigeant déclaré').strip()
+                role_lower = role_exact.lower()
+
+                # a. Exclusion explicite des rôles non décisionnaires commerciaux (commissaires aux comptes)
+                if 'commissaire aux comptes' in role_lower:
+                    continue
+
+                # b. Détection personne physique vs personne morale
+                type_dir = d.get('type_dirigeant')
+                has_nom = bool(d.get('nom'))
+                if type_dir:
+                    is_person = (type_dir.lower() == 'personne physique')
+                else:
+                    is_person = has_nom
+
+                if is_person:
+                    person_name = f"{d.get('prenoms', '')} {d.get('nom', '')}".strip()
+                else:
+                    person_name = (d.get('denomination') or '').strip()
+
                 if person_name:
-                    dirigeants.append({'name': person_name, 'role': role_exact})
+                    dirigeants.append({
+                        'name': person_name,
+                        'role': role_exact,
+                        'is_person': is_person
+                    })
 
             sirene_data = {
                 'found': True,
@@ -708,16 +730,43 @@ def main():
             secondary_size_proof_source = ""
             secondary_size_proof_details = ""
 
-        # 5. Preuve structurée pour le dirigeant
+        # 5. Sélection du dirigeant opérationnel / décideur
+        # c. Priorité aux personnes physiques avec un rôle de gestion réel
         dirigeants_list = sirene_data.get('dirigeants', [])
-        if dirigeants_list:
-            decision_maker = dirigeants_list[0]['name']
-            decision_maker_role = dirigeants_list[0]['role']
+        management_keywords = ['gérant', 'gerant', 'président', 'president', 'directeur général', 'directeur general', 'directeur', 'co-gérant', 'co-gerant', 'associé', 'associe', 'fondateur']
+
+        person_candidates = [d for d in dirigeants_list if d.get('is_person')]
+        moral_candidates = [d for d in dirigeants_list if not d.get('is_person')]
+
+        selected_leader = None
+        for p in person_candidates:
+            r_low = p['role'].lower()
+            if any(k in r_low for k in management_keywords):
+                selected_leader = p
+                break
+
+        if not selected_leader and person_candidates:
+            selected_leader = person_candidates[0]
+
+        if not selected_leader and moral_candidates:
+            for m in moral_candidates:
+                r_low = m['role'].lower()
+                if any(k in r_low for k in management_keywords):
+                    selected_leader = m
+                    break
+            if not selected_leader:
+                selected_leader = moral_candidates[0]
+
+        if selected_leader:
+            decision_maker = selected_leader['name']
+            decision_maker_role = selected_leader['role']
+            decision_maker_is_person = bool(selected_leader['is_person'])
             decision_maker_source = sirene_data.get('evidence_url')
             decision_maker_checked_at = now_iso
         else:
             decision_maker = 'Non identifié au registre'
             decision_maker_role = 'Inconnu'
+            decision_maker_is_person = False
             decision_maker_source = ''
             decision_maker_checked_at = now_iso
 
@@ -760,6 +809,7 @@ def main():
             'target_clients_checked_at': site_info['target_clients_checked_at'],
             'decision_maker': decision_maker,
             'decision_maker_role': decision_maker_role,
+            'decision_maker_is_person': decision_maker_is_person,
             'decision_maker_source': decision_maker_source,
             'decision_maker_checked_at': decision_maker_checked_at,
             'public_professional_email': 'Non extrait (Option)',

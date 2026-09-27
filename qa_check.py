@@ -418,6 +418,33 @@ def run_qa_checks(csv_path: Path = None, json_path: Path = None, md_path: Path =
             c20.append("requalify_leads.py référence encore l'ancien fichier temporaire.")
     record_check("Contrôle 20 (Synchronisation Notion / Dataset & Pipeline)", c20)
 
+    # 21. Salutation Personne Morale (TÂCHE 4)
+    c21 = []
+    if markdown_file.exists():
+        with open(markdown_file, 'r', encoding='utf-8') as f:
+            md_text = f.read()
+
+        # Interdiction formelle globale de toute salutation sur les personnes morales auditées (ex: WATTZ, SAMOTHRACE)
+        banned_historical_holdings = ["wattz", "wattz office", "samothrace"]
+        for bh in banned_historical_holdings:
+            if f"bonjour {bh}" in md_text.lower():
+                c21.append(f"Salutation nominative résiduelle interdite 'Bonjour {bh.title()}' détectée dans le markdown.")
+
+        for idx, l in enumerate(leads, 1):
+            is_person = str(l.get('decision_maker_is_person', '')).lower() in ('true', '1')
+            dm = l.get('decision_maker', '').strip()
+            clean_name = l.get('brand_name', '').split('|')[0].strip()
+
+            if not is_person and dm and dm not in ('Non identifié au registre', 'Inconnu'):
+                first_word = dm.split()[0].title()
+                banned_salutations = [f"Bonjour {first_word},", f"Bonjour {first_word} "]
+                for b_sal in banned_salutations:
+                    if b_sal.lower() in md_text.lower():
+                        c21.append(f"Ligne {idx:02d} [{clean_name}]: Salutation nominative non autorisée '{b_sal}' pour la personne morale '{dm}'.")
+    else:
+        c21.append(f"Fichier Markdown {markdown_file} introuvable.")
+    record_check("Contrôle 21 (Salutation Personne Morale)", c21)
+
     all_passed = all(results.values())
     return all_passed, results, failures
 
@@ -581,6 +608,11 @@ def run_negative_tests() -> Tuple[bool, int, int]:
             "name": "Outreach 3 : Placeholder corrompu ('Bonjour Non,')",
             "corrupt_md": base_md + "\n> Bonjour Non, voici une opportunité commerciale.",
             "expected_fail": "Contrôle 19 (Véracité Message d'Outreach)"
+        },
+        {
+            "name": "Outreach 4 : Salutation nominative sur personne morale ('Bonjour Wattz,')",
+            "corrupt_md": base_md + "\n> Bonjour Wattz, nous avons identifié votre agence Kwantic.",
+            "expected_fail": "Contrôle 21 (Salutation Personne Morale)"
         }
     ]
 
@@ -628,7 +660,7 @@ def run_negative_tests() -> Tuple[bool, int, int]:
     return all_passed, passed_count, total_count
 
 if __name__ == '__main__':
-    print("=== DÉMARRAGE AUDIT QA OFFICIEL (20 CONTRÔLES MÉTIER) ===")
+    print("=== DÉMARRAGE AUDIT QA OFFICIEL (21 CONTRÔLES MÉTIER) ===")
     passed, results, failures = run_qa_checks()
 
     for check_name, check_ok in results.items():
@@ -639,7 +671,7 @@ if __name__ == '__main__':
                 print(f"       -> {fail_msg}")
 
     print("-" * 50)
-    print(f"Bilan Dataset Réel : {sum(results.values())}/20 CONTRÔLES VALIDÉS.")
+    print(f"Bilan Dataset Réel : {sum(results.values())}/21 CONTRÔLES VALIDÉS.")
 
     neg_ok, neg_passed, neg_total = run_negative_tests()
     print("-" * 50)

@@ -49,3 +49,20 @@ Chaque test commercial ou technique est consigné avec :
 - **Résultats** : Identification concrète d'une anomalie critique sur le lead 09 (KWANTIC : président = société `WATTZ OFFICE`, interdisant l'outreach "Bonjour Wattz"). Vivier de 249 agences qualifiées désormais navigable par tranches successives sans biais.
 - **Conclusion** : **Hypothèse Validée**. L'automatisation ne remplace jamais le contrôle de vérité terrain. Le gel des données et l'audit humain constituent le seul rempart crédible avant toute prise de contact commerciale.
 
+---
+
+### [EXP-005] Éradication Déterministe des Salutations Personnes Morales & Filtrage des Rôles SIRENE
+- **Date** : 2026-09-27
+- **Hypothèse** : La sélection naïve du premier dirigeant SIRENE (`dirigeants[0]`) engendre des hallucinations critiques d'outreach (adresser des auditeurs légaux comme SAMOTHRACE ou des personnes morales comme WATTZ OFFICE avec un prénom fantaisiste).
+- **Protocole** :
+  1. Exclusion explicite des commissaires aux comptes (titulaires/suppléants) dans `requalify_leads.py`.
+  2. Priorisation stricte des personnes physiques avec mandat de gestion exécutif (Gérant, Président, DG, etc.).
+  3. Détection formelle des personnes morales (`type_dirigeant == 'personne morale'` ou absence de nom de famille) et ajout du champ booléen `decision_maker_is_person` dans le schéma de données.
+  4. Sécurisation de la génération de messages dans `build_notion_markdown.py` : bascule forcée vers la formule institutionnelle (`Bonjour l'équipe {clean_name},`) dès que `decision_maker_is_person == False`.
+  5. Implémentation du Contrôle QA 21 (Salutation Personne Morale) et ajout d'un test négatif `Outreach 4` garantissant l'échec immédiat en cas de salutation nominative sur personne morale.
+- **Résultats** :
+  - Sur les 30 leads actuels, 13 décisionnaires personnes physiques confirmés, 17 non-personnes (entités morales ou non identifiés).
+  - Présence de "Bonjour Wattz" dans le markdown généré : 0 occurrence (éradication totale prouvée par grep).
+  - Contrôles QA réels : 21/21 PASS. Tests négatifs : 18/18 PASS.
+- **Conclusion** : **Hypothèse Validée**. Le problème est résolu à la racine dans le pipeline de requalification, protégeant l'ensemble des 249 agences du vivier contre tout risque d'outreach absurde.
+

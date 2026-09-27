@@ -2,6 +2,17 @@
 
 Toutes les évolutions significatives du code, de la documentation et des données sont consignées ici.
 
+## [2026-09-27] — Audit Externe (Commit 039319f) : Filtrage Dirigeants & Salutation Personne Morale
+### Ajouté
+- **[Pipeline] Champ `decision_maker_is_person`** : Intégration du booléen obligatoire dans `requalify_leads.py` et spécification dans `docs/LEAD_DATA_SCHEMA.md` pour distinguer formellement personne physique et personne morale.
+- **[QA] Contrôle 21 (Salutation Personne Morale)** : Contrôle automatisé dans `qa_check.py` vérifiant qu'aucune salutation nominative n'est générée sur une entité morale (`decision_maker_is_person == False`), complété par un test négatif dédié dans la suite de validation (`Outreach 4`).
+
+### Corrigé
+- **[Pipeline] Exclusion des rôles non-décisionnaires** : Filtrage strict des commissaires aux comptes (titulaires et suppléants) au registre SIRENE dans `requalify_leads.py`.
+- **[Pipeline] Priorisation des personnes physiques et détection personne morale** : Choix prioritaire d'une personne physique avec mandat exécutif réel (Gérant, Président, Directeur Général). Si seule une personne morale existe, conservation pour traçabilité légale avec `decision_maker_is_person: false`.
+- **[Outreach] Neutralisation des salutations corporate erronées** : Dans `build_notion_markdown.py`, bascule systématique vers la formule institutionnelle (`Bonjour l'équipe {clean_name},`) dès que `decision_maker_is_person == False`, éradiquant définitivement les hallucinations de type "Bonjour Wattz".
+- **[Documentation] Sécurisation terrain KWANTIC** : Mise à jour de `docs/TRUTH_AUDIT_TEMPLATE.md` actant la neutralisation du risque par le code source.
+
 ## [2026-09-27] — Audit Externe (Commit 612e53d), Purge RGPD & Durcissement Déterministe
 ### Ajouté
 - **[RGPD] Purge complète de l'historique Git** : Élimination définitive de l'historique des données personnelles (avis et profils individuels sous `data/gmaps_agences_web_raw.csv`) via `git-filter-repo`, force-push sur `origin/main` et consignation sous ADR-007 dans `docs/DECISIONS.md`.

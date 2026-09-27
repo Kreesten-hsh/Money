@@ -237,9 +237,8 @@ Pour chaque lead certifié `VERIFIED`, Kreesten doit vérifier manuellement :
 - **Dirigeant extrait au registre** : **WATTZ OFFICE** (Président de SAS — **Personne Morale**)
 - **Offre observée** : Création et refonte de sites web
 
-> [!WARNING]
-> **ANOMALIE D'IDENTIFICATION DIRIGEANT SUR KWANTIC** : Le président déclaré au greffe est la holding **WATTZ OFFICE** (SIREN 833898083), et non une personne physique.
-> **Interdiction formelle** d'envoyer un message d'outreach commençant par *"Bonjour Wattz"*. Le représentant légal personne physique de cette société (ex: gérant de WATTZ OFFICE) doit être vérifié sur le site / LinkedIn avant tout message, ou la salutation doit rester institutionnelle (*"Bonjour à l'équipe Kwantic"*).
+> [!NOTE]
+> **SÉCURISATION PAR LE CODE (Commit courant)** : L'anomalie d'identification de dirigeant personne morale a été traitée à la racine dans `requalify_leads.py` (exclusion des commissaires aux comptes, priorité personne physique, détection personne morale via `decision_maker_is_person = False`). Dans `build_notion_markdown.py`, la formule bascule automatiquement vers la salutation institutionnelle (*"Bonjour l'équipe Kwantic,"*). Le Contrôle 21 de `qa_check.py` bloque désormais formellement toute tentative de salutation nominative dérivée d'une personne morale.
 
 | # | Point de Contrôle | Résultat Terrain | Validation (O/N) | Notes & Observations |
 |---|---|---|:---:|---|
@@ -250,10 +249,10 @@ Pour chaque lead certifié `VERIFIED`, Kreesten doit vérifier manuellement :
 | 5 | Site actif dans le navigateur ? | Chargement https://kwantic.fr/ | [ ] | Site actif |
 | 6 | Activité = Vraie agence web ? | Agence développement web / ERP / CRM | [ ] | NAF 62.01Z |
 | 7 | main_offer représentatif ? | Développement web & solutions sur-mesure | [ ] | Visible sur la page d'accueil |
-| 8 | Dirigeant = Bonne personne / rôle ? | **WATTZ OFFICE = Personne morale** | [ ] | ⚠️ Identifier la personne physique réelle |
+| 8 | Dirigeant = Bonne personne / rôle ? | **WATTZ OFFICE = Personne morale** | [X] | Détecté par le code (`decision_maker_is_person = False`) |
 | 9 | Téléphone appartient à l'agence ? | +33 9 70 70 86 70 | [ ] | Ligne VoIP d'entreprise |
 | 10 | Reasons conformes aux preuves ? | Score 75 / Conf 100 | [ ] | Formules valides |
-| 11 | Message outreach sans hallucination ? | **Revoir la salutation** | [ ] | Interdiction du 'Bonjour Wattz' |
+| 11 | Message outreach sans hallucination ? | **Sécurisé par le code** | [X] | Formule institutionnelle 'Bonjour l'équipe Kwantic,' appliquée |
 
 ---
 
@@ -285,5 +284,5 @@ Pour chaque lead certifié `VERIFIED`, Kreesten doit vérifier manuellement :
 ## Synthèse Opérationnelle & Décisions Avant Tout Démarchage
 
 1. **Gel des données** : `data/top30_leads_requalified.csv/json` reste inchangé tant que ce contrôle humain n'a pas été formellement complété et acté.
-2. **Correction obligatoire d'outreach sur KWANTIC** : Ne jamais contacter KWANTIC avec une salutation automatisée vers sa holding `WATTZ OFFICE`.
+2. **Neutralisation par le code de l'outreach sur KWANTIC** : Le risque d'adresser la holding `WATTZ OFFICE` a été neutralisé à la racine dans le pipeline (`decision_maker_is_person = False`, salutation institutionnelle `Bonjour l'équipe Kwantic,`, vérifié par le Contrôle QA 21).
 3. **Surveillance des 3 agences en tranche 01** (`Simplement`, `Evolyon`, `Web Tribe Studio`) : La co-gérance est une preuve juridique d'activité collective, mais le terrain doit vérifier que l'agence n'est pas redevenue un projet individuel (freelance isolé).

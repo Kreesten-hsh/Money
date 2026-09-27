@@ -131,8 +131,11 @@ def generate_lead_intelligence_markdown():
         # 2. Où on l'a observé
         # 3. Pourquoi cela a conduit à sélectionner l'entreprise
         # 4. Ce que nous proposons
+        # Salutation : conditionnée strictement à decision_maker_is_person
+        is_person = str(p.get('decision_maker_is_person', '')).lower() in ('true', '1')
         has_dirigeant = bool(dirigeant and not dirigeant.lower().startswith('non identifié') and dirigeant != 'Inconnu')
-        if has_dirigeant:
+
+        if is_person and has_dirigeant:
             prenom = dirigeant.split()[0].title()
             salutation = f"Bonjour {prenom},"
         else:
