@@ -2,6 +2,20 @@
 
 Toutes les évolutions significatives du code, de la documentation et des données sont consignées ici.
 
+## [2026-09-27] — Intégration OSINT Déterministe, Cadre LinkedIn & QA 23 Points (Branche feat/lead-osint-enrichment)
+### Ajouté
+- **[Pipeline] Module déterministe `enrich_leads_osint.py`** : Étape 4 insérée dans le pipeline. Valide les emails candidats par résolution MX native RFC 1035 en pur Python stdlib (socket/UDP direct sans `dnspython`), impose la concordance stricte de domaine avec le site audité en Niveau 1, et détecte de façon observable l'empreinte CMS via signatures HTML et en-têtes HTTP.
+- **[Contrat de Données] Schéma de Staging OSINT** : Définition formelle de `data/osint_emails_staging.json` consommant les extractions passives gratuites de theHarvester exécuté hors code.
+- **[Schéma] Extension Traçabilité Emails & CMS** : Adjonction de 7 nouveaux champs dans `docs/LEAD_DATA_SCHEMA.md` (`email_source`, `email_evidence`, `email_checked_at`, `cms_detected`, `cms_source`, `cms_evidence`, `cms_checked_at`).
+- **[Configuration] `config/theHarvester.yaml`** : Restriction stricte aux 8 sources passives 100% gratuites (`crt.sh`, moteurs de recherche, DNS) et désactivation formelle des modules payants / à quotas (`shodan`, `censys`, `hunter`).
+- **[Gouvernance] Enregistrement d'ADR-008 et ADR-009** : Adoption au statut NOW d'ADR-008 (encadrement strict de la consultation LinkedIn passive en lecture seule) et d'ADR-009 (enrichissement OSINT déterministe et traçabilité emails).
+- **[QA] Contrôles 22 et 23 + Fixtures OSINT 1 et 2** : Extension de `qa_check.py` à 23 contrôles métier (Contrôle 22: Auditabilité & Concordance Email; Contrôle 23: Preuve & Auditabilité CMS) et 20 tests négatifs unitaires.
+
+### Corrigé
+- **[Gouvernance] Amendement d'ADR-003 & Politique RGPD** : Alignement de `docs/DECISIONS.md` et `docs/DATA_POLICY.md` §B sur la doctrine ADR-008 (consultation unitaire passive ≤ 5/jour, zéro stockage de données privées, maintien absolu de l'interdiction du spam et de l'automatisation).
+- **[Intégrité de Preuve] Faille sur `public_professional_email`** : Élimination du champ orphelin non audité au profit d'une exigence de preuve systématique et de validation MX.
+- **[Documentation] Resynchronisation globale QA** : Réalignement de `README.md`, `docs/QA_PROTOCOL.md` et `docs/TOOLING.md` sur le standard réel de 23 contrôles métier et 20 fixtures corrompues.
+
 ## [2026-09-27] — Audit Externe (Commit 039319f) : Filtrage Dirigeants & Salutation Personne Morale
 ### Ajouté
 - **[Pipeline] Champ `decision_maker_is_person`** : Intégration du booléen obligatoire dans `requalify_leads.py` et spécification dans `docs/LEAD_DATA_SCHEMA.md` pour distinguer formellement personne physique et personne morale.

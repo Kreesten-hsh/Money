@@ -9,9 +9,13 @@ Le projet Money applique le principe de **minimisation absolue des données** et
 - Seules les données manifestement rendues publiques par les personnes morales ou par les professionnels dans le cadre de leur activité commerciale sont collectées (mentions légales, sites officiels, registres publics du commerce).
 - Aucune donnée à caractère privé ou personnel non professionnel (adresses personnelles, téléphones personnels privés, données sensibles) n'est collectée, traitée ou stockée.
 
-### B. Interdiction Formelle du Scraping LinkedIn
-- Le scraping des profils personnels LinkedIn est banni de l'architecture.
-- L'identification de profils LinkedIn se limite à la consultation humaine de profils publics librement accessibles ou via des moteurs de recherche publics lorsque le dirigeant mentionne son agence publiquement.
+### B. Encadrement Strict de la Consultation LinkedIn (Conformité ADR-008 & RGPD)
+- Le scraping de masse et l'aspiration automatisée de listes de contacts LinkedIn sont formellement bannis de l'architecture.
+- L'utilisation d'outils d'assistance furtifs (`invisible_playwright_mcp`) est strictement restreinte à la consultation passive en lecture seule des pages d'entreprises et des profils publics de dirigeants préalablement identifiés au registre légal SIRENE.
+- Aucune connexion de compte personnel LinkedIn n'est autorisée (session publique déconnectée ou environnement isolé).
+- Le débit est strictement plafonné à 5 profils uniques audités par jour.
+- Zéro stockage de données privées (relations, historique, coordonnées personnelles privées) : seuls l'existence d'une activité éditoriale publique et le lien du profil sont vérifiés.
+- L'interdiction du cold-emailing massif et de l'envoi de messages automatisés (bots de connexion/inmail) demeure absolue et intégrale. L'approche reste 100% manuelle.
 
 ### C. Gestion des Incertitudes & Traçabilité des Preuves
 - Aucune extrapolation n'est admise : une donnée manquante est déclarée "Incertain" ou "Non identifié".

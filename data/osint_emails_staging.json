@@ -1,0 +1,27 @@
+{
+  "schema_version": "1.0",
+  "contract_type": "OSINT_EMAIL_STAGING",
+  "generated_by": "theHarvester (CLI Hors-Code — sources passives gratuites)",
+  "generated_at": "2026-09-27T12:00:00Z",
+  "active_sources": [
+    "crtsh",
+    "duckduckgo",
+    "bing",
+    "yahoo",
+    "baidu",
+    "hackertarget",
+    "dnsdumpster",
+    "anubis"
+  ],
+  "entries": [
+    {
+      "domain": "kreesten-design.fr",
+      "candidate_emails": [
+        "contact@kreesten-design.fr"
+      ],
+      "source": "theHarvester:crtsh",
+      "source_url": "https://crt.sh/?q=kreesten-design.fr",
+      "collected_at": "2026-09-27T12:00:00Z"
+    }
+  ]
+}

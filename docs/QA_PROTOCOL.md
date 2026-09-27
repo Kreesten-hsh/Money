@@ -5,7 +5,7 @@ Le contrôle qualité ne valide plus la simple présence de chaînes de caractè
 
 ---
 
-## 2. Checklist Obligatoire Pré-Livraison (20 Contrôles Métier)
+## 2. Checklist Obligatoire Pré-Livraison (23 Contrôles Métier)
 
 1. **Contrôle 01 (Intégrité des URLs & HTTPS)** : Chaque site web déclaré possède une URL canonique commençant par `https://` (ou une note explicite d'inaccessibilité).
 2. **Contrôle 02 (SIREN & Preuve Légale Structurée)** : Numéro SIREN officiel à 9 chiffres, présence de `siren_source` et URL greffe/INSEE officielle (`annuaire-entreprises.data.gouv.fr/entreprise/{siren}`).
@@ -27,14 +27,18 @@ Le contrôle qualité ne valide plus la simple présence de chaînes de caractè
 18. **Contrôle 18 (Traçabilité Justifications Reasons)** : Décomposition chiffrée obligatoire pour Lead Gen, GW et Confidence avec renvoi aux sources.
 19. **Contrôle 19 (Véracité Message d'Outreach Notion)** : Interdiction absolue d'affirmations d'urgence ("besoin urgent"), d'intentions d'achat supposées ("recherche actuellement des prestataires"), de compliments génériques non sourcés ("très solide") ou de placeholders corrompus ("Bonjour Non", "Bonjour ,").
 20. **Contrôle 20 (Synchronisation Notion / Dataset & Pipeline Réel)** : Concordance exacte entre dataset et rapport Markdown, connexion directe de la shortlist dédupliquée et absence d'anciens artefacts obsolètes.
+21. **Contrôle 21 (Salutation Personne Morale)** : Interdiction absolue de toute salutation nominative sur des personnes morales (`decision_maker_is_person == False`, ex: interdiction de "Bonjour Wattz"). Formule institutionnelle obligatoire.
+22. **Contrôle 22 (Auditabilité & Concordance Email Professionnel)** : Si `public_professional_email` est renseigné (≠ "Non extrait"), obligation stricte de renseigner `email_source`, `email_evidence`, `email_checked_at` (format ISO 8601), ainsi qu'une concordance stricte entre le domaine de l'email et le nom de domaine canonique du `website`.
+23. **Contrôle 23 (Preuve & Auditabilité Empreinte CMS)** : Si `cms_detected` est renseigné (≠ "Inconnu"), présence obligatoire de `cms_source` (URL auditée), de `cms_evidence` (extrait textuel de la signature observable ou en-tête HTTP) et de son horodatage ISO 8601.
 
 ---
 
-## 3. Banc de Tests Négatifs (17 Fixtures Corrompues)
-Le protocole exige l'exécution d'un banc de 17 tests négatifs démontrant que toute altération unitaire des règles provoque immédiatement un échec du contrôle correspondant :
+## 3. Banc de Tests Négatifs (20 Fixtures Corrompues)
+Le protocole exige l'exécution d'un banc de 20 tests négatifs démontrant que toute altération unitaire des règles provoque immédiatement un échec du contrôle correspondant :
 - **SIRENE (3 tests)** : delta ambigu < 20 forcé en `MATCH_CONFIRMED`, score insuffisant forcé en `MATCH_CONFIRMED`, lead `VERIFIED` avec matching incertain.
 - **Preuves (5 tests)** : absence de source SIRENE, tranche 01 sans preuve secondaire, dirigeant manquant, offre sans source, cible sans source.
 - **Temporalité (2 tests)** : date statique hardcodée, confusion date signal / date vérification.
 - **Scoring (3 tests)** : attribution artificielle de points au signal commercial, score hors borne (>100), score GW non neutralisé.
 - **Redondance (1 test)** : duplication artificielle de SIREN.
-- **Outreach (3 tests)** : formulation de besoin urgent, affirmation d'entreprises recherchant des prestataires, placeholder corrompu ("Bonjour Non,").
+- **OSINT & Enrichissement (2 tests)** : email renseigné sans source et avec discordance de domaine, CMS détecté renseigné sans source ni extrait de preuve.
+- **Outreach (4 tests)** : formulation de besoin urgent, affirmation d'entreprises recherchant des prestataires, placeholder corrompu ("Bonjour Non,"), salutation nominative sur personne morale ("Bonjour Wattz,").

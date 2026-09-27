@@ -21,11 +21,15 @@ Le pipeline opérationnel doit être exécuté dans l'ordre séquentiel suivant 
   └── python3 requalify_leads.py
           │
           ▼
-[4. Restitution Client / Hub]
+[4. Enrichissement OSINT Déterministe & Traçabilité]
+  └── python3 enrich_leads_osint.py
+          │
+          ▼
+[5. Restitution Client / Hub]
   └── python3 build_notion_markdown.py
           │
           ▼
-[5. Contrôle Qualité Pré-Livraison]
+[6. Contrôle Qualité Pré-Livraison]
   └── python3 qa_check.py
 ```
 
@@ -49,18 +53,29 @@ python3 requalify_leads.py
   - Calcule les scores découplés (`lead_gen_score`, `ghostwriting_score`, `confidence_score`) et génère les justifications textuelles (`reasons`).
 - **Sorties** : `data/top30_leads_requalified.json` et `data/top30_leads_requalified.csv`.
 
-### 3. Restitution Client & Lead Intelligence Room
+### 3. Enrichissement OSINT Déterministe (Emails & Empreinte CMS)
+```bash
+python3 enrich_leads_osint.py
+```
+- **Rôle** :
+  - Consomme le staging passif issu de theHarvester (`data/osint_emails_staging.json`).
+  - Valide les emails professionnels par résolution MX native en bibliothèque standard Python et contrôle de concordance stricte de domaine.
+  - Détecte l'empreinte CMS de façon observable via signatures HTML et en-têtes HTTP.
+  - Renseigne le triplet officiel de traçabilité (`source`, `evidence`, `checked_at`).
+- **Sorties** : `data/top30_leads_requalified.json` et `data/top30_leads_requalified.csv` enrichis.
+
+### 4. Restitution Client & Lead Intelligence Room
 ```bash
 python3 build_notion_markdown.py
 ```
 - **Rôle** : Génère la synthèse markdown consolidée avec tableau hiérarchisé par statut, fiches détaillées du Top 5 vérifié et templates de messages d'approche personnalisés (sans hallucination de prénom).
 - **Sortie** : `data/lead_intelligence_room.md`.
 
-### 4. Contrôle Qualité Automatisé (QA 20 Points & Tests Négatifs)
+### 5. Contrôle Qualité Automatisé (QA 23 Points & 20 Tests Négatifs)
 ```bash
 python3 qa_check.py
 ```
-- **Rôle** : Exécute automatiquement la vérification des 20 points de contrôle de vérité métier du protocole qualité (`docs/QA_PROTOCOL.md`) ainsi qu'une suite de tests négatifs sur fixtures délibérément corrompues.
+- **Rôle** : Exécute automatiquement la vérification des 23 points de contrôle de vérité métier du protocole qualité (`docs/QA_PROTOCOL.md`) ainsi qu'une suite de 20 tests négatifs sur fixtures délibérément corrompues.
 - **Points Clés** :
   - Hard gates pour le statut `VERIFIED` (`MATCH_CONFIRMED`, ICP strict 2-20, dirigeant officiel, HTTPS).
   - Plafond strict de confiance (max 60 si non-VERIFIED, max 40 si matching incertain).

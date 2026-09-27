@@ -1,0 +1,44 @@
+# theHarvester — Configuration Officielle Money (Budget 0€ & OSINT Passif)
+# Ce fichier définit les sources d'interrogation autorisées et désactive formellement
+# toute source soumise à clé d'API payante, carte bancaire ou quota restrictif.
+
+# Sources 100% Gratuites Activées (Découverte Passive & Zero Coût)
+active_sources:
+  - crtsh        # Journaux de transparence des certificats SSL (Certificate Transparency)
+  - duckduckgo   # Moteur de recherche public (sans clé)
+  - bing         # Moteur de recherche public (sans clé)
+  - yahoo        # Moteur de recherche public (sans clé)
+  - baidu        # Moteur de recherche public (sans clé)
+  - hackertarget # Requêtes DNS et sous-domaines publiques
+  - dnsdumpster  # Cartographie DNS passive gratuite
+  - anubis       # Découverte de sous-domaines et enregistrements publics
+
+# Sources Payantes, à Quota ou à Clé API DÉSACTIVÉES FORMELLEMENT
+disabled_sources:
+  shodan:
+    enabled: false
+    reason: "API payante / nécessite abonnement ou clé payante (Banni par ADR-000)"
+  censys:
+    enabled: false
+    reason: "API payante / nécessite carte bancaire (Banni par ADR-000)"
+  hunter:
+    enabled: false
+    reason: "Quota commercial restreint (10/mois), modèle freemium agressif (Banni)"
+  securityTrails:
+    enabled: false
+    reason: "API payante / nécessite carte bancaire (Banni)"
+  virustotal:
+    enabled: false
+    reason: "Nécessite clé API et quota strict (Banni)"
+  zoomeye:
+    enabled: false
+    reason: "API commerciale payante (Banni)"
+
+# Paramètres d'Exécution CLI
+execution_policy:
+  virtualenv: "Hors dépôt git (uv tool run theHarvester)"
+  max_results_per_source: 100
+  rate_limit_delay_seconds: 2.0
+  target_email_domains_only: true
+  output_format: "json"
+  staging_destination: "data/osint_emails_staging.json"

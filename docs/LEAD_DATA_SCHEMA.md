@@ -35,7 +35,14 @@ Chaque enregistrement du dataset de prospection doit respecter strictement les a
 | `decision_maker_is_person` | boolean | OUI | `True` si le décisionnaire retenu est une personne physique, `False` si personne morale ou non identifié |
 | `decision_maker_source` | string (URL) | NON | URL officielle prouvant l'identité légale (Annuaire des Entreprises) |
 | `decision_maker_checked_at` | string (ISO 8601) | OUI | Horodatage dynamique UTC de l'extraction du dirigeant |
-| `public_professional_email` | string | NON | Email professionnel public (ex: `Non extrait (Option)`) |
+| `public_professional_email` | string | NON | Email professionnel public (ou `Non extrait`). Interdiction d'adresses privées. Doit concorder avec le domaine de l'agence |
+| `email_source` | string (URL) | NON | Source exacte de découverte (ex: `https://agence.fr/contact/`, `crt.sh`, `Mentions Légales`). Obligatoire si email présent |
+| `email_evidence` | string | NON | Extrait textuel d'apparition ou preuve d'enregistrement MX actif (ex: `Enregistrement MX vérifié : mail.agence.fr`) |
+| `email_checked_at` | string (ISO 8601) | NON | Horodatage dynamique UTC de la vérification de l'adresse et du serveur MX |
+| `cms_detected` | string | NON | CMS ou framework détecté de manière observable (ex: `WordPress`, `Webflow`, `Shopify`, ou `Inconnu`) |
+| `cms_source` | string (URL) | NON | URL de la page ayant fourni la signature HTML/headers |
+| `cms_evidence` | string | NON | Balise HTML ou en-tête HTTP observable (ex: `meta[name='generator'] content='WordPress 6.4'`) |
+| `cms_checked_at` | string (ISO 8601) | NON | Horodatage dynamique UTC de l'audit CMS |
 | `public_phone` | string | NON | Numéro de téléphone direct vérifié |
 | `source_url` | string (URL) | OUI | Fiche de sourcing primaire (URL Google Maps) |
 | `evidence_url` | string (URL) | OUI | URL de preuve légale officielle (Annuaire des Entreprises) |

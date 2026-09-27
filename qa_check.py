@@ -10,6 +10,20 @@ BASE_DIR = Path(__file__).resolve().parent
 
 ISO_TIMESTAMP_REGEX = r'^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(Z|[+-]\d{2}:\d{2})$'
 
+def extract_canonical_domain(url: str) -> str:
+    """Extrait le nom de domaine canonique sans sous-domaine www."""
+    if not url:
+        return ''
+    try:
+        if not url.startswith(('http://', 'https://')):
+            url = 'https://' + url
+        netloc = urllib.parse.urlsplit(url).netloc.lower()
+        if netloc.startswith('www.'):
+            netloc = netloc[4:]
+        return netloc.split(':')[0]
+    except Exception:
+        return ''
+
 def run_qa_checks(csv_path: Path = None, json_path: Path = None, md_path: Path = None) -> Tuple[bool, Dict[str, bool], Dict[str, List[str]]]:
     """
     Exécute les 20 contrôles de vérité métier et de preuves structurées sur le dataset spécifié.
@@ -445,6 +459,48 @@ def run_qa_checks(csv_path: Path = None, json_path: Path = None, md_path: Path =
         c21.append(f"Fichier Markdown {markdown_file} introuvable.")
     record_check("Contrôle 21 (Salutation Personne Morale)", c21)
 
+    # 22. Auditabilité & Concordance Email Professionnel (ADR-009 & Schéma v2)
+    c22 = []
+    for idx, l in enumerate(leads, 1):
+        email = l.get('public_professional_email', '').strip()
+        e_src = l.get('email_source', '').strip()
+        e_ev = l.get('email_evidence', '').strip()
+        e_time = l.get('email_checked_at', '').strip()
+        website = l.get('website', '').strip()
+        site_domain = extract_canonical_domain(website)
+
+        if email and email not in ('Non extrait (Option)', 'Non extrait', 'Inconnu', 'Non trouvé'):
+            if '@' not in email or not re.match(r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$', email):
+                c22.append(f"Ligne {idx:02d} [{l.get('brand_name')}]: Format email invalide ('{email}').")
+            if not e_src:
+                c22.append(f"Ligne {idx:02d} [{l.get('brand_name')}]: email renseigné ('{email}') sans email_source.")
+            if not e_ev:
+                c22.append(f"Ligne {idx:02d} [{l.get('brand_name')}]: email renseigné ('{email}') sans email_evidence.")
+            if not e_time or not re.match(ISO_TIMESTAMP_REGEX, e_time):
+                c22.append(f"Ligne {idx:02d} [{l.get('brand_name')}]: email renseigné ('{email}') avec email_checked_at non-ISO.")
+            
+            email_domain = email.split('@')[1].lower() if '@' in email else ''
+            if site_domain and email_domain != site_domain and not email_domain.endswith('.' + site_domain):
+                c22.append(f"Ligne {idx:02d} [{l.get('brand_name')}]: Discordance domaine email '{email_domain}' vs site web '{site_domain}'.")
+    record_check("Contrôle 22 (Auditabilité & Concordance Email Professionnel)", c22)
+
+    # 23. Preuve & Auditabilité Empreinte CMS (Schéma v2)
+    c23 = []
+    for idx, l in enumerate(leads, 1):
+        cms = l.get('cms_detected', '').strip()
+        cms_src = l.get('cms_source', '').strip()
+        cms_ev = l.get('cms_evidence', '').strip()
+        cms_time = l.get('cms_checked_at', '').strip()
+
+        if cms and cms not in ('Inconnu', 'Non vérifié', 'Non extrait'):
+            if not cms_src:
+                c23.append(f"Ligne {idx:02d} [{l.get('brand_name')}]: CMS détecté ('{cms}') sans cms_source.")
+            if not cms_ev:
+                c23.append(f"Ligne {idx:02d} [{l.get('brand_name')}]: CMS détecté ('{cms}') sans cms_evidence.")
+            if cms_time and not re.match(ISO_TIMESTAMP_REGEX, cms_time):
+                c23.append(f"Ligne {idx:02d} [{l.get('brand_name')}]: CMS détecté ('{cms}') avec cms_checked_at non-ISO.")
+    record_check("Contrôle 23 (Preuve & Auditabilité Empreinte CMS)", c23)
+
     all_passed = all(results.values())
     return all_passed, results, failures
 
@@ -585,6 +641,27 @@ def run_negative_tests() -> Tuple[bool, int, int]:
                 "siren": rows[0]["siren"]
             }),
             "expected_fail": "Contrôle 13 (Non-Redondance SIREN)"
+        },
+
+        # OSINT & ENRICHISSEMENT (ADR-009 & Schéma v2)
+        {
+            "name": "OSINT 1 : Email professionnel renseigné sans source et avec discordance de domaine",
+            "modify": lambda rows: rows[0].update({
+                "public_professional_email": "contact@agence-externe-inconnue.com",
+                "email_source": "",
+                "email_evidence": "",
+                "email_checked_at": ""
+            }),
+            "expected_fail": "Contrôle 22 (Auditabilité & Concordance Email Professionnel)"
+        },
+        {
+            "name": "OSINT 2 : CMS détecté renseigné sans source ni extrait de preuve",
+            "modify": lambda rows: rows[0].update({
+                "cms_detected": "WordPress 6.4",
+                "cms_source": "",
+                "cms_evidence": ""
+            }),
+            "expected_fail": "Contrôle 23 (Preuve & Auditabilité Empreinte CMS)"
         }
     ]
 
@@ -660,7 +737,7 @@ def run_negative_tests() -> Tuple[bool, int, int]:
     return all_passed, passed_count, total_count
 
 if __name__ == '__main__':
-    print("=== DÉMARRAGE AUDIT QA OFFICIEL (21 CONTRÔLES MÉTIER) ===")
+    print("=== DÉMARRAGE AUDIT QA OFFICIEL (23 CONTRÔLES MÉTIER) ===")
     passed, results, failures = run_qa_checks()
 
     for check_name, check_ok in results.items():
@@ -671,7 +748,7 @@ if __name__ == '__main__':
                 print(f"       -> {fail_msg}")
 
     print("-" * 50)
-    print(f"Bilan Dataset Réel : {sum(results.values())}/21 CONTRÔLES VALIDÉS.")
+    print(f"Bilan Dataset Réel : {sum(results.values())}/23 CONTRÔLES VALIDÉS.")
 
     neg_ok, neg_passed, neg_total = run_negative_tests()
     print("-" * 50)
