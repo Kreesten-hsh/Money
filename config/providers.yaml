@@ -1,0 +1,61 @@
+# Configuration des Providers & Stratégie d'Enrichissement — Money V2
+
+# 1. Stratégie de repli pour l'audit de site web (Website Inspection)
+fallback_strategy:
+  website_inspection:
+    - http_provider
+    - firecrawl_provider
+    - invisible_playwright_mcp
+
+# 2. Routage des champs vers les providers
+field_routing:
+  main_offer:
+    primary: http_provider
+    fallbacks:
+      - firecrawl_provider
+      - invisible_playwright_mcp
+  target_clients:
+    primary: http_provider
+  public_professional_email:
+    primary: theharvester_provider
+  mx_valid:
+    primary: dns_mx_provider
+  cms_detected:
+    primary: cms_provider
+  decision_maker_linkedin_activity:
+    primary: invisible_playwright_mcp
+
+# 3. Registre des APIs sélectionnées (Catalogue API-mega-list filtré)
+api_registry:
+  recherche_entreprises_sirene:
+    name: "API Recherche d'Entreprises (data.gouv.fr)"
+    domain: "recherche-entreprises.api.gouv.fr"
+    endpoint: "https://recherche-entreprises.api.gouv.fr/search"
+    usage: "Vérification légale SIREN, effectifs INSEE et dirigeants"
+    cost: "0€ (Open Data)"
+    auth: "None"
+    status: "ACTIVE"
+  google_dns_doh:
+    name: "Google DNS-over-HTTPS"
+    domain: "dns.google"
+    endpoint: "https://dns.google/resolve"
+    usage: "Résolution MX sécurisée en contournement de filtrage UDP 53"
+    cost: "0€"
+    auth: "None"
+    status: "ACTIVE"
+  nominatim_osm:
+    name: "OpenStreetMap Nominatim"
+    domain: "nominatim.openstreetmap.org"
+    endpoint: "https://nominatim.openstreetmap.org/search"
+    usage: "Normalisation et géocodage des adresses physiques d'agences"
+    cost: "0€"
+    auth: "User-Agent obligatoire (1 req/s)"
+    status: "DOCUMENTED"
+  wappalyzer_core:
+    name: "Wappalyzer Tech Specs"
+    domain: "api.wappalyzer.com"
+    endpoint: "https://api.wappalyzer.com/v2/lookup"
+    usage: "Détection avancée de bibliothèques Javascript et CMS"
+    cost: "Freemium / API Key"
+    auth: "Bearer Token"
+    status: "INACTIVE"

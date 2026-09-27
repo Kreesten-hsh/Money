@@ -12,8 +12,10 @@
 | **Python Standard Library (scripts dédiés)** | Déduplication, scoring, calculs déterministes, exports | 0 € | Nécessite du code testé | **USE NOW** | Garantie de reproductibilité et traçabilité mathématique. |
 | **Notion MCP** | Interface de restitution et Lead Intelligence Room client | Inclus | Risque de saturation en cas de design surchargé | **USE NOW** | Interface premium, claire et immédiatement partageable avec un client pilote. |
 | **Scrapling** | Scraping de contournement si blocage ou rendu complexe | 0 € (Open source Python) | Complexité supérieure à un fetch simple | **TEST** | À activer uniquement en repli si Firecrawl échoue sur un site stratégique. |
-| **theHarvester (CLI local)** | Découverte passive d'emails professionnels publics et hôtes DNS | 0 € (Sources ouvertes passives) | Limité aux sources gratuites. Exécuté hors code (`uv tool`) | **USE NOW** | Configuré via `config/theHarvester.yaml` pour alimenter `data/osint_emails_staging.json`. |
-| **invisible_playwright_mcp** | Navigation furtive en lecture seule, contournement WAF & repli annuaires | 0 € (Open source local) | Réservé à l'opérateur IA en repli (ADR-008). Zéro compte connecté, débit ≤ 5/jour | **USE NOW** | Encadré par ADR-008 et consigné dans [docs/OPERATOR_RUNBOOK_MCP.md](file:///home/hasashi/Bureau/Money/docs/OPERATOR_RUNBOOK_MCP.md). |
+| **theHarvester (CLI local)** | Découverte passive d'emails professionnels publics et hôtes DNS | 0 € (Sources ouvertes passives) | Limité aux sources gratuites. Exécuté via provider `TheHarvesterProvider` | **USE NOW** | Configuré via `config/theHarvester.yaml` pour alimenter `data/osint_emails_staging.json`. |
+| **invisible_playwright_mcp** | Navigation furtive en lecture seule, contournement WAF & repli annuaires | 0 € (Open source local) | Réservé au repli et consultation ADR-008 (≤ 5/jour). Piloté via `InvisiblePlaywrightProvider` | **USE NOW** | Encadré par ADR-008, [docs/OPERATOR_RUNBOOK_MCP.md](file:///home/hasashi/Bureau/Money/docs/OPERATOR_RUNBOOK_MCP.md) et `patchright`. |
+| **Crawlee (Runner Node / Python)** | Moteur de batch crawling industriel avec file d'attente, retries et backoff | 0 € (Open source local) | Concurrence et timeout à calibrer selon ressources de la machine hôte | **USE NOW** | Intégré dans l'architecture via `CrawleeProvider` et `crawlee_runner.js`. |
+| **API-mega-list (Index 11 860 APIs)** | Catalogue et registre de découverte de services d'enrichissement gratuits | 0 € (Index public open data) | Sélection stricte obligatoire : seules les APIs vérifiées sont activées | **USE NOW** | Formalisé sous `docs/API_PROVIDER_REGISTRY.md` et `config/providers.yaml` via `ApiRegistryProvider`. |
 | **Proxies Résidentiels Payants** | Évitement de blocages à grande échelle | ~50 à 150 € / mois | Dépense inutile au stade MVP (< 500 leads) | **EXCLUDE** | Banni : non justifié tant qu'aucun client n'a payé. |
 | **OpenOutreach / Mass Emailing Automatisé** | Séquences de cold email automatisées | Variable | Risque élevé de spam, dégradation de domaine | **EXCLUDE** | Banni : la prospection MVP doit rester 100% manuelle et personnalisée. |
 | **Scraping LinkedIn massif / non régulé** | Collecte massive de profils personnels | Risque légal / blocage | Violation des CGU et des règles du projet | **EXCLUDE** | Strictement interdit par ADR-003. La consultation passive unitaire est encadrée par ADR-008. |
@@ -74,6 +76,12 @@ Tout ajout d'outil payant ou complexe exige au préalable :
   5. **Triplet de Preuve Structuré** : Chaque email, CMS ou donnée MCP enrichie reçoit obligatoirement son URL source, son extrait de preuve textuel et son horodatage ISO 8601 dynamique.
   6. **Non-Régression du Scoring** : Les scores Lead Gen, Ghostwriting et Confiance demeurent strictement inchangés.
 
+### `enrichment_orchestrator.py` (Architecture V2)
+- **Rôle** : Orchestrateur central d'enrichissement multi-providers avec chaîne de repli, télémétrie, diagnostic et étanchéité absolue.
+- **Entrées** : `data/top30_leads_requalified.json`, `config/providers.yaml`.
+- **Options CLI** : `--offset`, `--limit`, `--input`, `--output`, `--explain <LEAD_ID>`.
+- **Sortie** : `data/top30_leads_requalified.json` enrichi et `data/telemetry_events.json`.
+
 ### `build_notion_markdown.py`
 - **Rôle** : Restitution client et génération de la Lead Intelligence Room.
 - **Entrée** : `data/top30_leads_requalified.json`.
@@ -83,6 +91,6 @@ Tout ajout d'outil payant ou complexe exige au préalable :
   2. **Vérité d'Outreach** : Messages personnalisés sans hallucination (zéro "besoin urgent", zéro "échantillon préparé", salutations nominatives vérifiées).
 
 ### `qa_check.py`
-- **Rôle** : Contrôle qualité automatisé à 23 points de contrôle métier + banc de 20 tests négatifs sur fixtures altérées.
+- **Rôle** : Contrôle qualité automatisé à 24 points de contrôle métier + banc de 21 tests négatifs sur fixtures altérées.
 - **Entrées** : `data/top30_leads_requalified.csv`, `data/top30_leads_requalified.json`, `data/lead_intelligence_room.md`.
 - **Exécution** : Bloque toute livraison si un contrôle échoue ou si une anomalie n'est pas détectée sur fixture négative.

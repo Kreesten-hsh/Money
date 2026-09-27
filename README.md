@@ -53,20 +53,24 @@ python3 requalify_leads.py
   - Calcule les scores découplés (`lead_gen_score`, `ghostwriting_score`, `confidence_score`) et génère les justifications textuelles (`reasons`).
 - **Sorties** : `data/top30_leads_requalified.json` et `data/top30_leads_requalified.csv`.
 
-### 3. Orchestration theHarvester & Enrichissement OSINT Déterministe
+### 3. Orchestration Multi-Providers & Enrichissement V2
 ```bash
-# Optionnel : génération du staging emails via theHarvester CLI (si installé via uv tool install theHarvester)
-python3 harvest_osint.py --offset 0 --limit 30
+# Architecture V2 : Orchestration centralisée avec chaîne de repli et observabilité
+python3 enrichment_orchestrator.py --offset 0 --limit 30
 
-# Ingestion et enrichissement déterministe (emails, MX, CMS, MCP staging)
+# Diagnostic d'un prospect (Pourquoi non enrichi ?)
+python3 enrichment_orchestrator.py --explain "Nom ou domaine du prospect"
+
+# Optionnel (Pipeline V1) : Moissonnage CLI theHarvester et ingestion
+python3 harvest_osint.py --offset 0 --limit 30
 python3 enrich_leads_osint.py
 ```
 - **Rôle** :
-  - Orchestration de theHarvester via subprocess stdlib pur (`harvest_osint.py`).
-  - Consomme les stagings passifs (`data/osint_emails_staging.json` et `data/mcp_audit_staging.json`).
-  - Valide les emails professionnels par résolution MX native en 3 paliers (DNS UDP brut RFC 1035, `getaddrinfo`, et DoH HTTPS `dns.google` pur stdlib) et contrôle de concordance stricte de domaine.
-  - Détecte l'empreinte CMS de façon observable via signatures HTML et en-têtes HTTP.
-  - Renseigne le triplet officiel de traçabilité (`source`, `evidence`, `checked_at`) et l'activité LinkedIn consultative (ADR-008) sans jamais altérer les registres légaux.
+  - Orchestration modulaire via `money_v2` pilotant `HttpProvider`, `FirecrawlProvider`, `InvisiblePlaywrightProvider` (`patchright`), `TheHarvesterProvider`, `DnsMxProvider`, `CmsTechnologyProvider`, `CrawleeProvider` et `ApiRegistryProvider`.
+  - Chaîne de repli déterministe pour l'audit web : `HTTP -> Firecrawl -> Invisible Playwright -> ERROR`.
+  - Détection CMS observable et résolution MX en 3 paliers (DNS UDP RFC 1035, `getaddrinfo`, et DoH HTTPS `dns.google` pur stdlib).
+  - Enregistrement universel d'évidences à 11 dimensions et persistance télémétrique (`data/telemetry_events.json`).
+  - Barrière d'étanchéité inviolable (`LegalReconciliationLayer`) interdisant toute modification des champs SIRENE Niveau 1/2.
 - **Sorties** : `data/top30_leads_requalified.json` et `data/top30_leads_requalified.csv` enrichis.
 
 ### 4. Restitution Client & Lead Intelligence Room
@@ -76,17 +80,18 @@ python3 build_notion_markdown.py
 - **Rôle** : Génère la synthèse markdown consolidée avec tableau hiérarchisé par statut, fiches détaillées du Top 5 vérifié et templates de messages d'approche personnalisés (sans hallucination de prénom).
 - **Sortie** : `data/lead_intelligence_room.md`.
 
-### 5. Contrôle Qualité Automatisé (QA 24 Points & 21 Tests Négatifs)
+### 5. Contrôle Qualité Métier & Tests Comportementaux V2
 ```bash
+# 1. Contrôle Qualité Métier (24 points & 21 tests négatifs)
 python3 qa_check.py
+
+# 2. Suite de Tests Comportementaux V2 (24 tests unitaires)
+python3 -m unittest tests/test_v2_architecture.py
 ```
-- **Rôle** : Exécute automatiquement la vérification des 24 points de contrôle de vérité métier du protocole qualité (`docs/QA_PROTOCOL.md`) ainsi qu'une suite de 21 tests négatifs sur fixtures délibérément corrompues.
-- **Points Clés** :
-  - Hard gates pour le statut `VERIFIED` (`MATCH_CONFIRMED`, ICP strict 2-20, dirigeant officiel, HTTPS).
-  - Plafond strict de confiance (max 60 si non-VERIFIED, max 40 si matching incertain).
-  - Neutralisation du score Ghostwriting (0/100) en l'absence d'audit LinkedIn vérifié.
-  - Zéro affirmation non prouvée dans l'outreach et aucun faux signal dérivé des avis Google.
-  - Étanchéité absolue Niveau 4 vs Niveaux 1/2 : aucune donnée issue du staging MCP ne peut altérer l'identité du dirigeant ou la taille d'entreprise.
+- **Rôle** :
+  - `qa_check.py` : Exécute automatiquement la vérification des 24 points de contrôle de vérité métier (`docs/QA_PROTOCOL.md`) et 21 tests négatifs sur fixtures délibérément corrompues.
+  - `tests/test_v2_architecture.py` : Valide 24 scénarios comportementaux d'infrastructure (pannes réseau, timeouts, blocages WAF, détection d'outils manquants, étanchéité SIRENE, pagination de découverte, rejet de CAC et personnes morales).
+
 
 ---
 

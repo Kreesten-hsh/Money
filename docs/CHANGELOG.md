@@ -2,6 +2,36 @@
 
 Toutes les évolutions significatives du code, de la documentation et des données sont consignées ici.
 
+## [2026-09-27] — Architecture V2 : Intégration Complète OSINT, Providers, Chaîne de Repli & Observabilité (Branche feat/architecture-v2-provider-integration)
+### Ajouté
+- **[Architecture V2 & Modèle d'Évidence]** :
+  - Création du package `money_v2` structuré en 5 modules : `contracts`, `providers`, `orchestrator`, `discovery`, `truth`.
+  - Spécification du contrat `Evidence` répondant aux 11 dimensions d'auditabilité formelle (champ, valeur, source, URL, timestamp ISO 8601 UTC, méthode, provider, statut, extrait de preuve, confiance, lead_id).
+  - Implémentation des 11 statuts normalisés `ProviderStatus` interdisant formellement de masquer une panne technique (`RATE_LIMITED`, `BLOCKED`, `TIMEOUT`, `NETWORK_ERROR`, `TOOL_MISSING`) en absence de résultat (`NO_RESULT`).
+- **[Adapters de Providers Dédiés]** :
+  - `BaseProvider` : classe abstraite universelle avec mesure télémétrique automatique et gestion des exceptions.
+  - `HttpProvider` : audit web standard Niveau 1 (pur stdlib urllib/ssl) avec extraction de `main_offer` et `target_clients`.
+  - `FirecrawlProvider` : adaptateur Niveau 2 pour l'extraction markdown et l'analyse de structure.
+  - `InvisiblePlaywrightProvider` : navigateur furtif Niveau 3 basé sur `patchright` (Turnstile/anti-bot bypass) et consultation LinkedIn encadrée (ADR-008 ≤ 5/jour) avec interdiction stricte de toucher aux champs légaux.
+  - `TheHarvesterProvider` : moissonnage OSINT passif avec politique de confiance (pattern vs email vérifié) et détection binaire.
+  - `DnsMxProvider` : résolution MX déterministe à 3 paliers (UDP RFC 1035 -> getaddrinfo -> DoH dns.google).
+  - `CmsTechnologyProvider` : détection d'empreinte CMS observable sur signatures HTML et en-têtes HTTP.
+  - `CrawleeProvider` : moteur de batch crawling industriel avec file d'attente, retries, limitation de concurrence et backoff exponentiel (`crawlee_runner.js`).
+  - `ApiRegistryProvider` : adaptateur interfaçant les APIs sélectionnées du catalogue API-mega-list via `config/providers.yaml`.
+- **[Orchestration, Chaîne de Repli & Diagnostic]** :
+  - `FallbackStrategy` : chaîne ordonnée `HTTP -> Firecrawl -> Invisible Playwright -> ERROR`.
+  - `EnrichmentOrchestrator` & CLI `enrichment_orchestrator.py` : pilotage par configuration, fusion sans écrasement légal et diagnostic instantané `--explain <LEAD_ID>`.
+  - `ObservabilityHub` : persistance télémétrique dans `data/telemetry_events.json` traçant le motif exact de non-enrichissement.
+- **[Pipeline de Découverte Dynamique]** :
+  - `DiscoveryPipeline` dans `money_v2.discovery` : découplage intégral de listes statiques, support de nouveaux lots (`--raw-csv`, `--output-csv`), dédoublonnage, ordonnancement objectif et exclusion de leads déjà traités (`--exclude-processed`).
+- **[Garantie Légale & Réconciliation]** :
+  - `LegalReconciliationLayer` : exception `SealingViolationError` bloquant toute tentative d'écrasement des données SIRENE.
+  - `TruthEvaluator` : évaluation multi-dimensionnelle de vérité (`VERIFIED`, `PARTIALLY_VERIFIED`, `UNVERIFIED`, `REQUIRES_REVIEW`, `NO_MATCH`, `ERROR`).
+- **[Documentation V2 & Tests]** :
+  - Rédaction de `docs/ARCHITECTURE_V2.md`, `docs/PROVIDER_ARCHITECTURE.md`, `docs/PROVIDER_CONTRACTS.md`, `docs/API_PROVIDER_REGISTRY.md`, `docs/ENRICHMENT_PIPELINE.md`.
+  - Suite de tests unitaires et comportementaux `tests/test_v2_architecture.py` (24/24 PASS).
+  - Maintien rigoureux des 24 contrôles et 21 tests négatifs de `qa_check.py` (0 régression).
+
 ## [2026-09-27] — Automatisation theHarvester, Runbook Opérateur MCP & QA 24 Points (Branche feat/mcp-runbook-and-harvest-automation)
 ### Ajouté
 - **[Écart 1 — Runbook Opérateur MCP & Contrat de Staging]** :

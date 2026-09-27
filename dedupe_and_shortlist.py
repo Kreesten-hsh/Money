@@ -48,12 +48,23 @@ def is_web_agency_category(category: str) -> bool:
     ]
     return any(k in cat_lower for k in keywords)
 
-def dedupe_and_shortlist():
-    raw_path = BASE_DIR / 'data' / 'gmaps_agences_web_raw.csv'
-    output_path = BASE_DIR / 'data' / 'gmaps_agences_web_shortlist.csv'
+def dedupe_and_shortlist(
+    raw_path_override: Path = None,
+    output_path_override: Path = None,
+    exclude_path_override: Path = None,
+    offset: int = 0,
+    limit: int = None
+):
+    raw_path = raw_path_override or (BASE_DIR / 'data' / 'gmaps_agences_web_raw.csv')
+    output_path = output_path_override or (BASE_DIR / 'data' / 'gmaps_agences_web_shortlist.csv')
 
     if not raw_path.exists():
         raise FileNotFoundError(f"Fichier brut introuvable : {raw_path}")
+
+    from money_v2.discovery.discovery_pipeline import DiscoveryPipeline
+
+    pipeline = DiscoveryPipeline()
+    seen_domains, seen_phones = pipeline.load_processed_identifiers(exclude_path_override)
 
     with open(raw_path, 'r', encoding='utf-8') as f:
         reader = csv.DictReader(f)
@@ -61,59 +72,13 @@ def dedupe_and_shortlist():
 
     print(f"Volume d'entrée brut : {len(raw_rows)} prospects.")
 
-    seen_domains = set()
-    seen_phones = set()
-    shortlisted = []
-    discarded_stats = {
-        'no_website': 0,
-        'non_web_category': 0,
-        'duplicate_domain': 0,
-        'duplicate_phone': 0
-    }
-
-    for row in raw_rows:
-        website = (row.get('website') or '').strip()
-        phone = (row.get('phone') or '').strip()
-        category = (row.get('category') or '').strip()
-
-        # Filtre 1 : Présence d'un site web
-        if not website:
-            discarded_stats['no_website'] += 1
-            continue
-
-        # Filtre 2 : Catégorie métier web
-        if not is_web_agency_category(category):
-            discarded_stats['non_web_category'] += 1
-            continue
-
-        # Filtre 3 : Dédoublonnage strict par domaine
-        domain = extract_domain(website)
-        if domain:
-            if domain in seen_domains:
-                discarded_stats['duplicate_domain'] += 1
-                continue
-            seen_domains.add(domain)
-
-        # Filtre 4 : Dédoublonnage strict par téléphone
-        norm_phone = normalize_phone(phone)
-        if norm_phone:
-            if norm_phone in seen_phones:
-                discarded_stats['duplicate_phone'] += 1
-                continue
-            seen_phones.add(norm_phone)
-
-        shortlisted.append(row)
-
-    # Ordonnancement objectif et déterministe :
-    # Tri par volume d'avis DESC, note DESC, titre ASC
-    shortlisted.sort(
-        key=lambda x: (
-            -int(float(x.get('review_count', 0) or 0)),
-            -float(x.get('review_rating', 0) or 0),
-            (x.get('title', '') or '').strip().lower()
-        )
+    final_shortlist, discarded_stats = pipeline.process_raw_dataset(
+        raw_rows=raw_rows,
+        exclude_domains=seen_domains,
+        exclude_phones=seen_phones,
+        offset=offset,
+        limit=limit
     )
-    final_shortlist = shortlisted
 
     if final_shortlist:
         fieldnames = list(final_shortlist[0].keys())
@@ -127,4 +92,19 @@ def dedupe_and_shortlist():
     return final_shortlist
 
 if __name__ == '__main__':
-    dedupe_and_shortlist()
+    import argparse
+    parser = argparse.ArgumentParser(description="Dédoublonnage & Shortlist Dynamique Money")
+    parser.add_argument("--raw-csv", type=str, default=None, help="Chemin du CSV brut source")
+    parser.add_argument("--output-csv", type=str, default=None, help="Chemin du CSV shortlist généré")
+    parser.add_argument("--exclude-processed", type=str, default=None, help="Chemin d'un CSV de leads déjà traités pour exclusion")
+    parser.add_argument("--offset", type=int, default=0, help="Offset de départ")
+    parser.add_argument("--limit", type=int, default=None, help="Nombre max de leads")
+    args = parser.parse_args()
+
+    dedupe_and_shortlist(
+        raw_path_override=Path(args.raw_csv) if args.raw_csv else None,
+        output_path_override=Path(args.output_csv) if args.output_csv else None,
+        exclude_path_override=Path(args.exclude_processed) if args.exclude_processed else None,
+        offset=args.offset,
+        limit=args.limit
+    )

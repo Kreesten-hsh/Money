@@ -1,0 +1,14 @@
+[
+  {
+    "provider": "http_provider",
+    "lead_id": "Linkeo",
+    "started_at": "2026-09-27T16:08:44Z",
+    "finished_at": "2026-09-27T16:08:47Z",
+    "duration_ms": 2622.69,
+    "status": "SUCCESS",
+    "records_found": 2,
+    "evidence_count": 2,
+    "error_type": null,
+    "error_message_safe": null
+  }
+]
