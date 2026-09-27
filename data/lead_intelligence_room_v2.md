@@ -13,7 +13,7 @@
 - **Offre Principale Observée** : Création de sites Web & Référencement SEO
 - **Cible Observée** : Non vérifié
 - **Email Professionnel** : `Non extrait (Option)` (MX valide : False)
-- **CMS / Stack** : Inconnu
+- **CMS / Stack** : Non détecté
 
 ### Ébauche de Prise de Contact Personnalisée (Vérifiée)
 ```text
@@ -29,7 +29,7 @@ Bonjour,
 - **Offre Principale Observée** : Création de sites Web & Référencement SEO
 - **Cible Observée** : Non vérifié
 - **Email Professionnel** : `Non extrait (Option)` (MX valide : True)
-- **CMS / Stack** : Inconnu
+- **CMS / Stack** : Non détecté
 
 ### Ébauche de Prise de Contact Personnalisée (Vérifiée)
 ```text
@@ -101,7 +101,7 @@ Kreesten Agboton
 - **Offre Principale Observée** : Développement Web sur-mesure
 - **Cible Observée** : Non vérifié
 - **Email Professionnel** : `Non extrait (Option)` (MX valide : True)
-- **CMS / Stack** : Inconnu
+- **CMS / Stack** : Non détecté
 
 ### Ébauche de Prise de Contact Personnalisée (Vérifiée)
 ```text
