@@ -6,15 +6,19 @@
 active_sources:
   - crtsh        # Journaux de transparence des certificats SSL (Certificate Transparency)
   - duckduckgo   # Moteur de recherche public (sans clé)
-  - bing         # Moteur de recherche public (sans clé)
   - yahoo        # Moteur de recherche public (sans clé)
   - baidu        # Moteur de recherche public (sans clé)
   - hackertarget # Requêtes DNS et sous-domaines publiques
   - dnsdumpster  # Cartographie DNS passive gratuite
-  - anubis       # Découverte de sous-domaines et enregistrements publics
 
-# Sources Payantes, à Quota ou à Clé API DÉSACTIVÉES FORMELLEMENT
+# Sources Payantes, à Quota ou Non Supportées DÉSACTIVÉES FORMELLEMENT
 disabled_sources:
+  anubis:
+    enabled: false
+    reason: "Moteur non supporté par theHarvester 5.0.0 (fait échouer avec code 1)"
+  bing:
+    enabled: false
+    reason: "Moteur non supporté par theHarvester 5.0.0 (fait échouer avec code 1)"
   shodan:
     enabled: false
     reason: "API payante / nécessite abonnement ou clé payante (Banni par ADR-000)"

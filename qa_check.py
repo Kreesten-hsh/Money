@@ -4,7 +4,7 @@ import re
 import urllib.parse
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import Dict, List, Optional, Set, Tuple
 
 BASE_DIR = Path(__file__).resolve().parent
 
@@ -24,9 +24,15 @@ def extract_canonical_domain(url: str) -> str:
     except Exception:
         return ''
 
-def run_qa_checks(csv_path: Path = None, json_path: Path = None, md_path: Path = None) -> Tuple[bool, Dict[str, bool], Dict[str, List[str]]]:
+def run_qa_checks(
+    csv_path: Path = None,
+    json_path: Path = None,
+    md_path: Path = None,
+    mcp_staging_path: Path = None
+) -> Tuple[bool, Dict[str, bool], Dict[str, List[str]], Dict[str, str]]:
     """
-    Exécute les 20 contrôles de vérité métier et de preuves structurées sur le dataset spécifié.
+    Exécute les 25 contrôles de vérité métier et de preuves structurées sur le dataset spécifié.
+    Supporte explicitement les statuts PASS, FAIL et SKIPPED (aucun succès silencieux).
     """
     csv_file = csv_path or (BASE_DIR / 'data' / 'top30_leads_requalified.csv')
     json_file = json_path or (BASE_DIR / 'data' / 'top30_leads_requalified.json')
@@ -34,7 +40,7 @@ def run_qa_checks(csv_path: Path = None, json_path: Path = None, md_path: Path =
 
     if not csv_file.exists():
         print(f"FAIL: Fichier {csv_file} introuvable.")
-        return False, {}, {"Dataset": [f"Fichier {csv_file} inexistant"]}
+        return False, {}, {"Dataset": [f"Fichier {csv_file} inexistant"]}, {}
 
     with open(csv_file, 'r', encoding='utf-8') as f:
         reader = csv.DictReader(f)
@@ -49,12 +55,23 @@ def run_qa_checks(csv_path: Path = None, json_path: Path = None, md_path: Path =
         except Exception:
             json_leads = []
 
-    results = {}
-    failures = {}
+    results: Dict[str, bool] = {}
+    failures: Dict[str, List[str]] = {}
+    statuses: Dict[str, str] = {}
 
-    def record_check(name: str, check_failures: List[str]):
-        results[name] = len(check_failures) == 0
-        failures[name] = check_failures
+    def record_check(name: str, check_failures: List[str], skipped_reason: Optional[str] = None):
+        if skipped_reason:
+            statuses[name] = "SKIPPED"
+            results[name] = False
+            failures[name] = [skipped_reason]
+        elif len(check_failures) == 0:
+            statuses[name] = "PASS"
+            results[name] = True
+            failures[name] = []
+        else:
+            statuses[name] = "FAIL"
+            results[name] = False
+            failures[name] = check_failures
 
     # 1. Intégrité des URLs & HTTPS
     c1 = []
@@ -503,9 +520,16 @@ def run_qa_checks(csv_path: Path = None, json_path: Path = None, md_path: Path =
 
     # 24. Étanchéité Staging MCP vs Registre Légal (ADR-008 & Niveau 4 vs Niveau 1/2)
     c24 = []
-    mcp_staging_file = BASE_DIR / 'data' / 'mcp_audit_staging.json'
-    mcp_prohibited_values: Set[str] = set()
-    if mcp_staging_file.exists():
+    mcp_staging_file = mcp_staging_path or (BASE_DIR / 'data' / 'mcp_audit_staging.json')
+    if not mcp_staging_file.exists():
+        record_check(
+            "Contrôle 24 (Étanchéité Staging MCP vs Registre Légal)",
+            [],
+            skipped_reason="Impossible de vérifier l'étanchéité MCP : fichier de staging absent"
+        )
+    else:
+        mcp_prohibited_values: Set[str] = set()
+        staging_read_error: Optional[str] = None
         try:
             with open(mcp_staging_file, 'r', encoding='utf-8') as f:
                 mcp_data = json.load(f)
@@ -514,25 +538,32 @@ def run_qa_checks(csv_path: Path = None, json_path: Path = None, md_path: Path =
                     val = str(entry.get('extracted_value', '')).strip()
                     if val and len(val) >= 4 and val.lower() not in ('true', 'false', 'inconnu', 'non extrait', 'non vérifié', 'none', 'null'):
                         mcp_prohibited_values.add(val.lower())
-        except Exception:
-            pass
+        except Exception as e:
+            staging_read_error = str(e)
 
-    for idx, l in enumerate(leads, 1):
-        dm = str(l.get('decision_maker', '')).strip().lower()
-        dm_role = str(l.get('decision_maker_role', '')).strip().lower()
-        c_size = str(l.get('company_size', '')).strip().lower()
-        c_size_code = str(l.get('company_size_code', '')).strip().lower()
+        if staging_read_error:
+            record_check(
+                "Contrôle 24 (Étanchéité Staging MCP vs Registre Légal)",
+                [],
+                skipped_reason=f"Impossible de vérifier l'étanchéité MCP : erreur de lecture du staging ({staging_read_error})"
+            )
+        else:
+            for idx, l in enumerate(leads, 1):
+                dm = str(l.get('decision_maker', '')).strip().lower()
+                dm_role = str(l.get('decision_maker_role', '')).strip().lower()
+                c_size = str(l.get('company_size', '')).strip().lower()
+                c_size_code = str(l.get('company_size_code', '')).strip().lower()
 
-        for prohibited in mcp_prohibited_values:
-            if prohibited in dm or dm == prohibited:
-                c24.append(f"Ligne {idx:02d} [{l.get('brand_name')}]: Fuite MCP staging dans decision_maker ('{l.get('decision_maker')}').")
-            if prohibited in dm_role or dm_role == prohibited:
-                c24.append(f"Ligne {idx:02d} [{l.get('brand_name')}]: Fuite MCP staging dans decision_maker_role ('{l.get('decision_maker_role')}').")
-            if prohibited in c_size or c_size == prohibited:
-                c24.append(f"Ligne {idx:02d} [{l.get('brand_name')}]: Fuite MCP staging dans company_size ('{l.get('company_size')}').")
-            if prohibited in c_size_code or c_size_code == prohibited:
-                c24.append(f"Ligne {idx:02d} [{l.get('brand_name')}]: Fuite MCP staging dans company_size_code ('{l.get('company_size_code')}').")
-    record_check("Contrôle 24 (Étanchéité Staging MCP vs Registre Légal)", c24)
+                for prohibited in mcp_prohibited_values:
+                    if prohibited in dm or dm == prohibited:
+                        c24.append(f"Ligne {idx:02d} [{l.get('brand_name')}]: Fuite MCP staging dans decision_maker ('{l.get('decision_maker')}').")
+                    if prohibited in dm_role or dm_role == prohibited:
+                        c24.append(f"Ligne {idx:02d} [{l.get('brand_name')}]: Fuite MCP staging dans decision_maker_role ('{l.get('decision_maker_role')}').")
+                    if prohibited in c_size or c_size == prohibited:
+                        c24.append(f"Ligne {idx:02d} [{l.get('brand_name')}]: Fuite MCP staging dans company_size ('{l.get('company_size')}').")
+                    if prohibited in c_size_code or c_size_code == prohibited:
+                        c24.append(f"Ligne {idx:02d} [{l.get('brand_name')}]: Fuite MCP staging dans company_size_code ('{l.get('company_size_code')}').")
+            record_check("Contrôle 24 (Étanchéité Staging MCP vs Registre Légal)", c24)
 
     # 25. Absence d'Erreurs Techniques MCP dans les Données (Filet de Sécurité Anti-Régression)
     c25 = []
@@ -564,8 +595,8 @@ def run_qa_checks(csv_path: Path = None, json_path: Path = None, md_path: Path =
                     c25.append(f"Ligne {idx:02d} [{clean_name}]: Champ '{field}' contient un message d'erreur MCP non filtré : '{pattern}'.")
     record_check("Contrôle 25 (Absence d'Erreurs Techniques MCP dans les Données)", c25)
 
-    all_passed = all(results.values())
-    return all_passed, results, failures
+    all_passed = all(s == "PASS" for s in statuses.values())
+    return all_passed, results, failures, statuses
 
 def run_negative_tests() -> Tuple[bool, int, int]:
     """
@@ -728,11 +759,21 @@ def run_negative_tests() -> Tuple[bool, int, int]:
         },
         # ÉTANCHÉITÉ MCP STAGING & ERREURS TECHNIQUES (Contrôles 24 & 25)
         {
-            "name": "MCP 1 : Valeur issue du staging MCP ayant fuité dans decision_maker légal",
+            "name": "MCP 1 : Valeur issue du staging MCP ayant fuité dans decision_maker légal (Staging présent)",
             "modify": lambda rows: rows[0].update({
                 "decision_maker": "Création de sites web vitrines et e-commerce sur-mesure"
             }),
-            "expected_fail": "Contrôle 24 (Étanchéité Staging MCP vs Registre Légal)"
+            "expected_fail": "Contrôle 24 (Étanchéité Staging MCP vs Registre Légal)",
+            "expected_status": "FAIL"
+        },
+        {
+            "name": "MCP 1b : Staging absent avec fuite injectée dans decision_maker -> Signalé explicitement non vérifiable",
+            "modify": lambda rows: rows[0].update({
+                "decision_maker": "Création de sites web vitrines et e-commerce sur-mesure"
+            }),
+            "mcp_staging_path": BASE_DIR / "data" / "non_existent_mcp_staging_fixture.json",
+            "expected_fail": "Contrôle 24 (Étanchéité Staging MCP vs Registre Légal)",
+            "expected_status": "SKIPPED"
         },
         {
             "name": "MCP 2 : Erreur technique MCP injectée dans main_offer",
@@ -785,13 +826,22 @@ def run_negative_tests() -> Tuple[bool, int, int]:
             writer.writeheader()
             writer.writerows(corrupted)
 
-        _, results, _ = run_qa_checks(csv_path=temp_csv)
-        failed_as_expected = not results.get(fix["expected_fail"], True)
-        if failed_as_expected:
-            print(f"  [PASS] {fix['name']} -> Rejeté par '{fix['expected_fail']}'.")
+        staging_arg = fix.get("mcp_staging_path")
+        _, results, failures, statuses = run_qa_checks(csv_path=temp_csv, mcp_staging_path=staging_arg)
+        actual_status = statuses.get(fix["expected_fail"], "PASS")
+        expected_status = fix.get("expected_status")
+
+        if expected_status:
+            detected = (actual_status == expected_status)
+        else:
+            detected = (actual_status in ("FAIL", "SKIPPED"))
+
+        if detected:
+            msg = f"Rejeté ({actual_status})" if actual_status == "FAIL" else f"Signalé comme non vérifiable ({actual_status})"
+            print(f"  [PASS] {fix['name']} -> {msg} par '{fix['expected_fail']}'.")
             passed_count += 1
         else:
-            print(f"  [FAIL] {fix['name']} -> NON DÉTECTÉ par '{fix['expected_fail']}' !")
+            print(f"  [FAIL] {fix['name']} -> NON DÉTECTÉ (statut='{actual_status}') par '{fix['expected_fail']}' !")
 
     if temp_csv.exists():
         temp_csv.unlink()
@@ -800,9 +850,9 @@ def run_negative_tests() -> Tuple[bool, int, int]:
         with open(temp_md, 'w', encoding='utf-8') as f:
             f.write(fix["corrupt_md"])
 
-        _, results, _ = run_qa_checks(md_path=temp_md)
-        failed_as_expected = not results.get(fix["expected_fail"], True)
-        if failed_as_expected:
+        _, results, failures, statuses = run_qa_checks(md_path=temp_md)
+        actual_status = statuses.get(fix["expected_fail"], "PASS")
+        if actual_status in ("FAIL", "SKIPPED"):
             print(f"  [PASS] {fix['name']} -> Rejeté par '{fix['expected_fail']}'.")
             passed_count += 1
         else:
@@ -816,22 +866,26 @@ def run_negative_tests() -> Tuple[bool, int, int]:
 
 if __name__ == '__main__':
     print("=== DÉMARRAGE AUDIT QA OFFICIEL (25 CONTRÔLES MÉTIER) ===")
-    passed, results, failures = run_qa_checks()
+    passed, results, failures, statuses = run_qa_checks()
 
-    for check_name, check_ok in results.items():
-        status = "PASS" if check_ok else "FAIL"
+    passed_count = sum(1 for s in statuses.values() if s == "PASS")
+    skipped_count = sum(1 for s in statuses.values() if s == "SKIPPED")
+    failed_count = sum(1 for s in statuses.values() if s == "FAIL")
+    total_checks = len(statuses)
+
+    for check_name, status in statuses.items():
         print(f"[{status}] {check_name}")
-        if not check_ok:
+        if status != "PASS":
             for fail_msg in failures[check_name]:
                 print(f"       -> {fail_msg}")
 
     print("-" * 50)
-    print(f"Bilan Dataset Réel : {sum(results.values())}/25 CONTRÔLES VALIDÉS.")
+    print(f"Bilan Dataset Réel : {passed_count}/{total_checks} PASS, {skipped_count} SKIPPED, {failed_count} FAIL.")
 
     neg_ok, neg_passed, neg_total = run_negative_tests()
     print("-" * 50)
     print(f"Bilan Tests Négatifs : {neg_passed}/{neg_total} CORRUPTIONS DÉTECTÉES ({'PASS' if neg_ok else 'FAIL'}).")
 
-    total_ok = passed and neg_ok
+    total_ok = (failed_count == 0 and skipped_count == 0) and neg_ok
     print(f"RÉSULTAT GLOBAL : {'CONFORME AUX STANDARDS DE VÉRITÉ' if total_ok else 'NON CONFORME'}")
     exit(0 if total_ok else 1)
