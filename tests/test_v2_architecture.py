@@ -13,8 +13,8 @@ Couvre les 24 exigences comportementales critiques de l'architecture V2 :
 8. mcp_attempts_to_overwrite_sirene
 9. theharvester_returns_pattern_only
 10. theharvester_returns_duplicate_emails
-11. crawlee_partial_crawl
-12. crawlee_retry_exhaustion
+11. fallback_strategy_3_tiers
+12. mcp_playwright_client_isolation
 13. api_provider_unavailable
 14. api_registry_provider_inactive
 15. person_morale_selected_as_decision_maker
@@ -45,7 +45,6 @@ from money_v2.orchestrator.fallback_strategy import FallbackStrategy
 from money_v2.orchestrator.observability import ObservabilityHub
 from money_v2.providers.api_registry_provider import ApiRegistryProvider
 from money_v2.providers.base import BaseProvider
-from money_v2.providers.crawlee_provider import CrawleeProvider
 from money_v2.providers.dns_mx_provider import DnsMxProvider
 from money_v2.providers.http_provider import HttpProvider
 from money_v2.providers.playwright_provider import InvisiblePlaywrightProvider
@@ -200,27 +199,28 @@ class TestV2ArchitectureBehavioral(unittest.TestCase):
         )))
         self.assertEqual(deduped, ["contact@agency.fr"])
 
-    def test_11_crawlee_partial_crawl(self):
-        """Un batch où une URL réussit et une échoue renvoie un statut PARTIAL."""
-        prov = CrawleeProvider()
-        # Mock de batch_data partiel
-        batch_data = {
-            "total_urls": 2,
-            "successful": ["https://ok.com"],
-            "failed": [{"url": "https://fail.com", "error_message": "404"}],
-            "items": [{"url": "https://ok.com", "status_code": 200, "retries": 0}]
-        }
-        res = prov._run("https://ok.com", {"urls": ["https://ok.com", "https://fail.com"]})
-        # Si exécuté en simulation directe
-        self.assertIn(res.status, (ProviderStatus.PARTIAL, ProviderStatus.NETWORK_ERROR, ProviderStatus.SUCCESS))
+    def test_11_fallback_strategy_3_tiers(self):
+        """La chaîne de repli FallbackStrategy comporte strictement 3 paliers sans Crawlee."""
+        strategy = FallbackStrategy()
+        self.assertFalse(hasattr(strategy, "crawlee"))
+        lead = {"url": "https://example-test-fallback.fr", "siren": "999999999"}
+        res, audit_trail = strategy.execute_inspection_chain(lead)
+        self.assertEqual(len(audit_trail), 3)
+        self.assertEqual(audit_trail[0]["tier"], 1)
+        self.assertEqual(audit_trail[1]["tier"], 2)
+        self.assertEqual(audit_trail[2]["tier"], 3)
+        self.assertEqual(audit_trail[2]["provider"], "technical_consignation")
+        self.assertIn(res.status, (ProviderStatus.SUCCESS, ProviderStatus.NO_RESULT, ProviderStatus.BLOCKED, ProviderStatus.NETWORK_ERROR, ProviderStatus.TIMEOUT, ProviderStatus.UNKNOWN_ERROR))
 
-    def test_12_crawlee_retry_exhaustion(self):
-        """Un échec après retries est consigné dans failed avec le compte d'essais."""
-        prov = CrawleeProvider(max_retries=2, timeout_sec=1)
-        res_batch = prov.crawl_batch(["http://127.0.0.1:59998/offline"])
-        self.assertEqual(len(res_batch["successful"]), 0)
-        self.assertEqual(len(res_batch["failed"]), 1)
-        self.assertEqual(res_batch["failed"][0]["retries"], 2)
+    def test_12_mcp_playwright_client_isolation(self):
+        """InvisiblePlaywrightProvider vérifie la disponibilité de uv et s'exécute en subprocess sans import direct."""
+        import shutil
+        prov = InvisiblePlaywrightProvider()
+        has_uv = bool(shutil.which("uv"))
+        self.assertEqual(prov.is_available(), has_uv)
+        if not has_uv:
+            res = prov.execute("https://example.com", {"trigger_type": "annuaire_fallback"})
+            self.assertEqual(res.status, ProviderStatus.TOOL_MISSING)
 
     def test_13_api_provider_unavailable(self):
         """Une API distante indisponible retourne NETWORK_ERROR."""

@@ -4,7 +4,7 @@ run_pipeline_v2.py — Point d'Entrée CLI Unifié du Pipeline Money V2.2
 
 Exécute l'architecture intégrée :
 1. Découverte dynamique ou chargement de lot existant (sans liste codée en dur).
-2. Orchestration multi-providers (HTTP, Playwright, theHarvester, Crawlee, API Registry DoH).
+2. Orchestration multi-providers (HTTP, Firecrawl, theHarvester, API Registry DoH).
 3. Verrouillage de l'étanchéité légale SIRENE (LegalReconciliationLayer).
 4. Évaluation dimensionnelle de vérité (TruthEvaluator).
 5. Consolidation AI Lead Intelligence & Founder Ghostwriting.

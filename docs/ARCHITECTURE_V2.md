@@ -41,13 +41,15 @@ Le système cible la qualification déterministe d'agences web françaises (2 à
                                      │
         ┌────────────────────────────┼────────────────────────────┐
         ▼                            ▼                            ▼
-[CHAÎNE DE REPLI SITE]       [OSINT EMAILS PASSIP]        [DÉLIVRABILITÉ & CMS]
+[CHAÎNE DE REPLI SITE]       [OSINT EMAILS PASSIF]        [DÉLIVRABILITÉ & CMS]
 1. HttpProvider              TheHarvesterProvider         1. DnsMxProvider
    (urllib / SSL / regex)    (CLI passive sans quota)        (UDP -> getaddrinfo -> DoH)
 2. FirecrawlProvider         - Emails canoniques          2. CmsTechnologyProvider
    (API/MCP markdown)        - Banishment adresses perso     (Signatures HTML/headers)
-3. InvisiblePlaywright       - Patterns séparés           3. CrawleeProvider
-   (patchright / stealth)                                    (Crawl industriel par lots)
+3. Consignation Technique    - Patterns séparés           [STAGING HORS CHAÎNE HTTP]
+   (Échec explicite tracé)                                - InvisiblePlaywrightProvider
+                                                            (MCP stdio subprocess Firefox)
+                                                          - agent-reach (opérateur)
                                      │
                                      ▼
                   [4. REGISTRE D'APIs & CATALOGUE MEGA-LIST]
@@ -82,18 +84,16 @@ Le système cible la qualification déterministe d'agences web françaises (2 à
 | **Provider Contracts** | `money_v2.contracts.provider_result` | Statuts, erreurs et télémétrie d'exécution | 0 (stdlib) |
 | **HttpProvider** | `money_v2.providers.http_provider` | Palier 1 inspection web standard | 0 (stdlib urllib/ssl) |
 | **FirecrawlProvider** | `money_v2.providers.firecrawl_provider` | Palier 2 extraction markdown avancée | Optionnel (FIRECRAWL_API_KEY) |
-| **InvisiblePlaywright** | `money_v2.providers.playwright_provider` | Palier 3 furtif WAF/Turnstile & LinkedIn ADR-008 | `patchright` / `playwright` |
+| **InvisiblePlaywright** | `money_v2.providers.playwright_provider` | Enrichissement furtif annuaires/WAF & LinkedIn ADR-008 (Staging/Hors chaîne synchrone) | `uv` / `uvx invisible-playwright-mcp` (subprocess isolé) |
 | **TheHarvesterProvider** | `money_v2.providers.theharvester_provider` | OSINT passif emails sans détection | theHarvester CLI |
 | **DnsMxProvider** | `money_v2.providers.dns_mx_provider` | Résolution MX 3 paliers (UDP / addr / DoH) | 0 (stdlib socket/urllib) |
 | **CmsTechnologyProvider**| `money_v2.providers.cms_provider` | Empreinte CMS observable | 0 (stdlib urllib) |
-| **CrawleeProvider** | `money_v2.providers.crawlee_provider` | Crawl par lots avec file, retries, backoff | Node.js / stdlib fallback |
 | **ApiRegistryProvider** | `money_v2.providers.api_registry_provider` | Catalogue d'APIs issues d'API-mega-list | 0 (stdlib urllib) |
 | **EnrichmentOrchestrator**| `money_v2.orchestrator` | Routage des champs, fusion & étanchéité | 0 (stdlib) |
 | **ObservabilityHub** | `money_v2.orchestrator.observability` | Diagnostic 'Pourquoi ce lead non enrichi ?' | 0 (stdlib) |
 | **DiscoveryPipeline** | `money_v2.discovery.discovery_pipeline` | Découverte dynamique, pagination, exclusion | 0 (stdlib) |
 | **LegalReconciliation** | `money_v2.truth.reconciliation` | Garantie inviolable d'étanchéité légale | 0 (stdlib) |
 | **TruthEvaluator** | `money_v2.truth.truth_evaluator` | Évaluation multi-dimensionnelle de vérité | 0 (stdlib) |
-| **CrawlPlanner** | `money_v2.orchestrator.crawl_planner` | Planification dynamique d'URLs et extraction multi-pages | CrawleeProvider |
 | **LeadIntelligenceService** | `money_v2.services.lead_intelligence_service` | Conformité ICP, score Lead Gen, outreach sans hallucination | 0 (stdlib) |
 | **GhostwritingIntelligenceService** | `money_v2.services.ghostwriting_service` | Éligibilité dirigeant physique, score neutralisé, angles B2B | 0 (stdlib) |
 | **MoneyPipelineV2** | `money_v2.pipeline` | Pipeline unifié E2E découverte -> qualification -> enrichissement -> dual output | 0 (stdlib) |

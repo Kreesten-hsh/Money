@@ -10,7 +10,7 @@ Valide les 10 exigences négatives absolues (Section 13) :
 5. Timeout converti en EMPTY / NO_RESULT -> Interdit (doit être TIMEOUT)
 6. Réponse API malformée -> Interdit de prétendre au succès (doit être PARSE_ERROR / UNKNOWN_ERROR)
 7. Provenance absente (source ou provider vide) -> Rejeté par EvidenceValidationError
-8. Résultat Crawlee injecté sans source URL -> Rejeté par EvidenceValidationError
+8. Évidence de crawling injectée sans source URL -> Rejeté par EvidenceValidationError
 9. Email générique promu en email personnel du dirigeant sans preuve -> Rejeté par ConfidencePolicyViolationError
 10. Évidence produite sans horodatage ISO complet -> Rejeté par EvidenceValidationError
 """
@@ -195,8 +195,8 @@ class TestV21NegativeSuite(unittest.TestCase):
             )
         self.assertIn("provider", str(ctx_prov.exception))
 
-    def test_08_crawlee_result_injected_without_source_rejected(self):
-        """8. Résultat Crawlee injecté sans source URL -> Rejeté par EvidenceValidationError."""
+    def test_08_crawled_result_injected_without_source_rejected(self):
+        """8. Résultat de crawling injecté sans source URL -> Rejeté par EvidenceValidationError."""
         with self.assertRaises(EvidenceValidationError) as ctx:
             Evidence(
                 field="crawled_content",
@@ -204,8 +204,8 @@ class TestV21NegativeSuite(unittest.TestCase):
                 source="batch_crawler",
                 source_url="",  # Absence de source_url
                 observed_at=get_current_iso_timestamp(),
-                method=ObservationMethod.BATCH_CRAWL.value,
-                provider="crawlee_provider",
+                method=ObservationMethod.DOM_INSPECTION.value,
+                provider="external_crawler",
                 provider_status=ProviderStatus.SUCCESS.value,
                 evidence_text="Page crawlée",
                 confidence=ConfidenceLevel.HIGH.value,

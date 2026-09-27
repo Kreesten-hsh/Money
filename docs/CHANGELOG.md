@@ -2,6 +2,28 @@
 
 Toutes les évolutions significatives du code, de la documentation et des données sont consignées ici.
 
+## [2026-09-27] — Correctif Intégration Réelle Outils Sans Substitution (Branche fix/real-tool-integration-no-substitution)
+### Supprimé & Corrigé
+- **[Suppression Complète de Crawlee & Chaîne 3 Paliers]** :
+  - Suppression définitive de `money_v2/providers/crawlee_provider.py`, `money_v2/providers/crawlee_runner.js` et `money_v2/orchestrator/crawl_planner.py`.
+  - Retrait de Crawlee de `FallbackStrategy` (nouvelle chaîne à 3 paliers : `HttpProvider (1) -> FirecrawlProvider (2) -> Consignation Technique (3)`), d'`EnrichmentOrchestrator` et de la documentation (`docs/TOOLING.md`, `docs/ARCHITECTURE_V2.md`, `docs/PROVIDER_ARCHITECTURE.md`, `README.md`).
+- **[Réécriture InvisiblePlaywrightProvider — Serveur MCP Stdio Réel & Firefox Stealth]** :
+  - Élimination intégrale des imports directs `patchright.sync_api` et `playwright.sync_api` du code Money.
+  - Création du client isolé `mcp_playwright_client.py` utilisant le SDK officiel `mcp` en stdio pour invoquer `uvx invisible-playwright-mcp`.
+  - Intégration du moteur Firefox patché stealth (`firefox-151.0-stealth`, Linux/Windows uniquement, macOS non supporté).
+  - Exécution en sous-processus isolé via `uv run --with mcp --python 3.11 python3 mcp_playwright_client.py` sans ajout dans `requirements.txt`.
+  - Préservation des garde-fous invariants (`FORBIDDEN_FIELDS`, quota ADR-008 ≤ 5/jour, exigence `MATCH_CONFIRMED`).
+  - `is_available()` vérifie la présence réelle de `uv` dans le PATH.
+- **[Statut Opérateur agent-reach & Staging Audité]** :
+  - Confirmation du statut "USE NOW (outil opérateur hors code)" sans forçage dans un provider synchrone.
+  - Extension du contrat `data/mcp_audit_staging.json` avec la valeur valide `trigger_type="agent_reach_research"`.
+  - Documentation du cas d'usage ponctuel dans `docs/OPERATOR_RUNBOOK_MCP.md`.
+- **[Arbitrage theHarvester]** :
+  - `TheHarvesterProvider` confirmé comme le chemin actif V2 intégré à `EnrichmentOrchestrator`.
+  - `harvest_osint.py` documenté et annoté formellement comme module déprécié (outil legacy V1).
+- **[Validation Qualité & Non-Régression]** :
+  - Banc complet 100% PASS : `tests/test_v2_architecture.py` (24/24), `tests/test_v2_2_full_pipeline.py` (6/6), `tests/test_v2_1_negative_suite.py` (10/10), `qa_check.py` (24 contrôles + 21 fixtures négatives).
+
 ## [2026-09-27] — Architecture V2.2 : Intégration Complète AI Lead Intelligence + Founder LinkedIn Ghostwriting (Branche feat/architecture-v2.2-integrated-pipeline)
 ### Ajouté & Intégré
 - **[Chaîne de Repli à 4 Paliers & Orchestration Réelle]** :

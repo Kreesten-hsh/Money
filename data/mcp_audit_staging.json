@@ -21,6 +21,15 @@
       "source_url": "https://www.linkedin.com/in/exemple-dirigeant-agence",
       "evidence_text": "Publication publique observée datée de moins de 30 jours sur le développement d'agences.",
       "collected_at": "2026-09-27T12:00:00Z"
+    },
+    {
+      "domain": "alpha-digital.fr",
+      "trigger_type": "agent_reach_research",
+      "field_target": "main_offer",
+      "extracted_value": "Agence spécialisée en refonte Webflow et SEO B2B",
+      "source_url": "https://www.linkedin.com/company/alpha-digital",
+      "evidence_text": "Présentation publique d'entreprise observée via recherche opérateur agent-reach.",
+      "collected_at": "2026-09-27T12:00:00Z"
     }
   ]
 }

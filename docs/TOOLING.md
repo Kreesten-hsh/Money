@@ -13,8 +13,7 @@
 | **Notion MCP** | Interface de restitution et Lead Intelligence Room client | Inclus | Risque de saturation en cas de design surchargé | **USE NOW** | Interface premium, claire et immédiatement partageable avec un client pilote. |
 | **Scrapling** | Scraping de contournement si blocage ou rendu complexe | 0 € (Open source Python) | Complexité supérieure à un fetch simple | **TEST** | À activer uniquement en repli si Firecrawl échoue sur un site stratégique. |
 | **theHarvester (CLI local)** | Découverte passive d'emails professionnels publics et hôtes DNS | 0 € (Sources ouvertes passives) | Binaire requis dans le PATH système. En cas d'absence : signale `TOOL_UNAVAILABLE` sans feindre de résultat | **USE NOW** | Intégré via `TheHarvesterProvider` avec classification d'email stricte (générique vs nominatif vs dirigeant). |
-| **invisible_playwright_mcp (`patchright_local`)** | Navigation furtive de repli secondaire, contournement WAF & consultation ADR-008 | 0 € (Open source local) | Zéro garantie 100% Turnstile/DataDome. Repli secondaire uniquement, traçabilité `browser_usage_reason`, zéro écrasement SIRENE | **USE NOW** | Piloté via `InvisiblePlaywrightProvider` et `patchright`, encadré par `docs/OPERATOR_RUNBOOK_MCP.md`. |
-| **Crawlee (Runner Node / Python)** | Moteur de batch crawling industriel avec file d'attente, retries et backoff | 0 € (Open source local) | Concurrence et timeout à calibrer selon hôte. Rapport d'état par URL source obligatoire | **USE NOW** | Intégré via `CrawleeProvider` et `crawlee_runner.js` pour arborescences multi-pages. |
+| **invisible_playwright_mcp (MCP stdio)** | Navigation furtive de repli secondaire, contournement WAF & consultation ADR-008 | 0 € (Open source local) | Moteur Firefox patché stealth (Linux/Windows uniquement, macOS non supporté). Téléchargement initial via `uvx invisible-playwright fetch`. Traçabilité `browser_usage_reason`, quota 5/jour, zéro écrasement SIRENE | **USE NOW** | Piloté via `InvisiblePlaywrightProvider` invoquant en sous-processus isolé le client MCP stdio `mcp_playwright_client.py` (`uv run --with mcp`), encadré par `docs/OPERATOR_RUNBOOK_MCP.md`. |
 | **API-mega-list (Index 11 860 APIs)** | Catalogue et registre de découverte de services d'enrichissement | 0 € (Index public open data) | Catalogue de découverte, PAS un provider monolithique. Adaptateur isolé requis (ex: `google_dns_doh`) | **USE NOW** | Spécifié sous `docs/API_PROVIDER_REGISTRY.md` via `ApiRegistryProvider` (rejet strict des APIs inactives). |
 | **Proxies Résidentiels Payants** | Évitement de blocages à grande échelle | ~50 à 150 € / mois | Dépense inutile au stade MVP (< 500 leads) | **EXCLUDE** | Banni : non justifié tant qu'aucun client n'a payé. |
 | **OpenOutreach / Mass Emailing Automatisé** | Séquences de cold email automatisées | Variable | Risque élevé de spam, dégradation de domaine | **EXCLUDE** | Banni : la prospection MVP doit rester 100% manuelle et personnalisée. |
@@ -22,19 +21,20 @@
 
 ---
 
-## 1.1 Matrice d'Intégration Opérationnelle des 4 Outils Externes (Money V2.2)
+## 1.1 Matrice d'Intégration Opérationnelle des Outils Externes (Money V2.2)
 
 | Outil | Rôle Money V2 | Méthode d'appel | Modèle d'évidence | Statut si absent |
 |---|---|---|---|---|
-| **invisible_playwright_mcp** | Extraction anti-bot/WAF (Palier 3) & Consultation éditoriale LinkedIn dirigeant certifié (ADR-008) | `FallbackStrategy.execute_inspection_chain` & `enrich_lead` via `InvisiblePlaywrightProvider` | `Evidence(field='main_offer'|'target_clients'|'decision_maker_linkedin_activity')` avec `browser_usage_reason` obligatoire | `TOOL_MISSING` / `TOOL_UNAVAILABLE` |
+| **invisible_playwright_mcp** | Extraction anti-bot/WAF (Palier 3) & Consultation éditoriale LinkedIn dirigeant certifié (ADR-008) | `FallbackStrategy.execute_inspection_chain` & `enrich_lead` via `InvisiblePlaywrightProvider` (subprocess client stdio MCP) | `Evidence(field='main_offer'|'target_clients'|'decision_maker_linkedin_activity')` avec `browser_usage_reason` obligatoire | `TOOL_MISSING` / `TOOL_UNAVAILABLE` |
 | **theHarvester** | Moissonnage passif d'emails professionnels et sous-domaines sans interroger le serveur cible | `EnrichmentOrchestrator.enrich_lead` via `TheHarvesterProvider.execute` | `Evidence(field='public_professional_email')` avec `email_classification` rigoureuse (générique vs nominatif vs dirigeant) | `TOOL_MISSING` / `TOOL_UNAVAILABLE` |
-| **Crawlee** | Exploration industrielle multi-pages (Accueil, Services, Contact, Mentions) avec file d'attente et retries | `CrawlPlanner.execute_lead_crawl` via `CrawleeProvider.crawl_batch` | `Evidence(field='crawled_content'|'main_offer'|'target_clients')` traçant l'URL source exacte de chaque sous-page | `TOOL_MISSING` / `TOOL_UNAVAILABLE` |
+| **agent-reach** | Investigation opérateur multi-plateformes hors code (jugement IA ponctuel, pas de batch synchrone) | Opérateur / Session IA injectant via `data/mcp_audit_staging.json` (`trigger_type="agent_reach_research"`) | `Evidence(field='decision_maker_linkedin_activity'|'target_clients')` audité via staging | `TOOL_MISSING` / Non applicable (hors code) |
 | **API-mega-list** | Adaptateur normalisé d'APIs publiques ouvertes sans clé (`google_dns_doh`) | `EnrichmentOrchestrator.enrich_lead` via `ApiRegistryProvider.execute(api_name='google_dns_doh')` | `Evidence(field='api_doh_record')` rattaché à l'endpoint DNS-over-HTTPS | `TOOL_MISSING` / `CONFIG_ERROR` |
 
 > [!IMPORTANT]
-> **Honnêteté Technique & Décision d'Architecture (`patchright_local`)** :  
-> Le composant `invisible_playwright_mcp` est exécuté localement via le moteur furtif `patchright_local` (Chromium local patché contre la détection `navigator.webdriver` et les empreintes CDP standard) plutôt qu'à travers un serveur MCP distant standalone.  
-> Cette approche constitue une **décision d'architecture délibérée** et non une omission : elle garantit un fonctionnement 100% autonome, zéro dépendance réseau vis-à-vis d'un démon tiers, une latence inférieure à 2 secondes, tout en préservant strictement les mêmes garanties de furtivité, d'auditabilité et de non-écrasement des données légales.
+> **Intégration Réelle de `invisible_playwright_mcp`** :  
+> Le composant `invisible_playwright_mcp` est exécuté via le serveur MCP officiel (`uvx invisible-playwright-mcp`), piloté par le SDK officiel `mcp` dans un sous-processus isolé (`mcp_playwright_client.py`).  
+> Il utilise le moteur Firefox patché stealth (téléchargé au préalable via `uvx invisible-playwright fetch`).  
+> Aucun import direct de playwright/patchright n'est présent dans le code applicatif Money, garantissant une étanchéité totale du cœur applicatif.
 
 ---
 

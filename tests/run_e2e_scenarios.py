@@ -27,7 +27,6 @@ from money_v2.contracts.confidence_policy import ConfidencePolicy, EmailClassifi
 from money_v2.contracts.evidence import Evidence, get_current_iso_timestamp
 from money_v2.contracts.provider_status import ProviderStatus
 from money_v2.providers.api_registry_provider import ApiRegistryProvider
-from money_v2.providers.crawlee_provider import CrawleeProvider
 from money_v2.providers.playwright_provider import InvisiblePlaywrightProvider
 from money_v2.providers.theharvester_provider import TheHarvesterProvider
 from money_v2.truth.reconciliation import LegalReconciliationLayer
@@ -56,7 +55,7 @@ def print_block(
 
 
 def run_playwright_scenario() -> bool:
-    provider = InvisiblePlaywrightProvider(headless=True, timeout_ms=10000)
+    provider = InvisiblePlaywrightProvider(timeout_ms=25000)
     target = "https://example.com"
     context = {
         "lead_id": "lead_e2e_playwright",
@@ -69,8 +68,8 @@ def run_playwright_scenario() -> bool:
             tool="invisible_playwright_mcp",
             target_input=target,
             execution="InvisiblePlaywrightProvider.execute()",
-            raw_result="Moteur patchright/playwright indisponible",
-            normalized_result="TOOL_UNAVAILABLE",
+            raw_result="Client uv/mcp ou serveur MCP indisponible",
+            normalized_result="TOOL_MISSING",
             evidence="None",
             destination="telemetry_logs",
             qa_status="PASS",
@@ -87,7 +86,7 @@ def run_playwright_scenario() -> bool:
     raw_summary = json.dumps(res.raw_payload or {}, ensure_ascii=False)
     
     # Vérification QA : aucune tentative d'altération de champs légaux
-    is_qa_pass = res.status in {ProviderStatus.SUCCESS, ProviderStatus.NO_RESULT, ProviderStatus.SUCCESS_WITH_RESULTS}
+    is_qa_pass = res.status in {ProviderStatus.SUCCESS, ProviderStatus.NO_RESULT, ProviderStatus.SUCCESS_EMPTY, ProviderStatus.SUCCESS_WITH_RESULTS}
     print_block(
         tool="invisible_playwright_mcp",
         target_input=target,
@@ -138,34 +137,6 @@ def run_theharvester_scenario() -> bool:
     return True
 
 
-def run_crawlee_scenario() -> bool:
-    provider = CrawleeProvider(timeout_sec=5)
-    urls = ["https://example.com"]
-    context = {"lead_id": "lead_e2e_crawlee", "urls": urls}
-    
-    res = provider.execute("https://example.com", context)
-    
-    ev_str = "None"
-    if res.evidences:
-        ev_str = json.dumps(res.evidences[0].to_dict(), ensure_ascii=False)
-
-    raw_summary = json.dumps(res.raw_payload or {}, ensure_ascii=False)
-    is_qa_pass = res.status in {ProviderStatus.SUCCESS, ProviderStatus.PARTIAL}
-    
-    print_block(
-        tool="Crawlee",
-        target_input=str(urls),
-        execution="CrawleeProvider.crawl_batch(['https://example.com'])",
-        raw_result=raw_summary[:160] + "...",
-        normalized_result=f"Status: {res.status.value}, CrawledCount: {len(res.evidences)}",
-        evidence=ev_str,
-        destination="staging_crawled_content",
-        qa_status="PASS" if is_qa_pass else "FAIL",
-        qa_justification="Crawl industriel avec file d'attente, retries et traçabilité par URL source"
-    )
-    return is_qa_pass
-
-
 def run_api_registry_scenario() -> bool:
     provider = ApiRegistryProvider()
     target = "google.com"
@@ -207,18 +178,17 @@ def run_api_registry_scenario() -> bool:
 
 def main():
     print("=" * 70)
-    print("MONEY V2.1 — AUDIT & SCÉNARIOS D'EXÉCUTION E2E DES 4 OUTILS")
+    print("MONEY V2.2 — SCÉNARIOS D'EXÉCUTION E2E DES OUTILS RÉELS")
     print("=" * 70)
     
     p_ok = run_playwright_scenario()
     th_ok = run_theharvester_scenario()
-    cr_ok = run_crawlee_scenario()
     api_ok = run_api_registry_scenario()
     
     print("=" * 70)
-    all_ok = p_ok and th_ok and cr_ok and api_ok
+    all_ok = p_ok and th_ok and api_ok
     if all_ok:
-        print("BILAN GLOBAL E2E : 4/4 OUTILS VALIDÉS EN CONFORMITÉ ARCHITECTURALE STRICTE")
+        print("BILAN GLOBAL E2E : TOUS LES OUTILS VALIDÉS EN CONFORMITÉ ARCHITECTURALE STRICTE")
         sys.exit(0)
     else:
         print("BILAN GLOBAL E2E : ÉCHEC SUR UN OU PLUSIEURS OUTILS")

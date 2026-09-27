@@ -4,9 +4,9 @@ tests/test_v2_2_full_pipeline.py — Suite de Tests d'Intégration & Full E2E Mo
 
 Vérifie :
 1. test_full_pipeline_v2 : Circulation réelle des données à travers TOUS les composants :
-   Lead Input -> Orchestrator (Playwright, theHarvester, Crawlee, API Registry)
+   Lead Input -> Orchestrator (Playwright MCP, theHarvester, API Registry)
    -> Evidence Layer -> Legal Reconciliation -> Truth Evaluator -> Services Métier -> Output
-2. test_crawl_planner_multi_page : Intégration réelle de Crawlee sur arborescence multi-pages
+2. test_fallback_strategy_chain_integration : Intégration de la chaîne de repli déterministe à 3 paliers
 3. test_api_registry_doh_wiring : Appel actif de google_dns_doh via ApiRegistryProvider
 4. test_ghostwriting_neutralization : Neutralisation stricte du score en l'absence d'activité publique
 5. test_sealing_preservation_e2e : Immutabilité absolue des données légales SIRENE
@@ -23,13 +23,12 @@ from money_v2.contracts.confidence_policy import ConfidencePolicy, EmailClassifi
 from money_v2.contracts.evidence import ConfidenceLevel, Evidence, ObservationMethod, get_current_iso_timestamp
 from money_v2.contracts.provider_result import ProviderResult, ProviderTelemetry
 from money_v2.contracts.provider_status import ProviderStatus
-from money_v2.orchestrator.crawl_planner import CrawlPlanner
 from money_v2.orchestrator.enrichment_orchestrator import EnrichmentOrchestrator
+from money_v2.orchestrator.fallback_strategy import FallbackStrategy
 from money_v2.orchestrator.observability import ObservabilityHub
 from money_v2.pipeline import MoneyPipelineV2
 from money_v2.providers.api_registry_provider import ApiRegistryProvider
 from money_v2.providers.base import BaseProvider
-from money_v2.providers.crawlee_provider import CrawleeProvider
 from money_v2.providers.playwright_provider import InvisiblePlaywrightProvider
 from money_v2.providers.theharvester_provider import TheHarvesterProvider
 from money_v2.services.ghostwriting_service import GhostwritingIntelligenceService
@@ -47,13 +46,11 @@ class TestMoneyV22FullPipeline(unittest.TestCase):
             observability_hub=self.hub,
             enable_theharvester=True,
             enable_playwright=True,
-            enable_crawlee=True,
             enable_api_registry=True
         )
         self.pipeline = MoneyPipelineV2(observability_hub=self.hub, orchestrator=self.orchestrator)
 
     @patch("money_v2.providers.http_provider.HttpProvider._run")
-    @patch("money_v2.providers.crawlee_provider.CrawleeProvider.crawl_batch")
     @patch("money_v2.providers.playwright_provider.InvisiblePlaywrightProvider._run")
     @patch("money_v2.providers.theharvester_provider.TheHarvesterProvider._run")
     @patch("money_v2.providers.api_registry_provider.ApiRegistryProvider._run")
@@ -66,7 +63,6 @@ class TestMoneyV22FullPipeline(unittest.TestCase):
         mock_doh,
         mock_harvester,
         mock_playwright,
-        mock_crawlee,
         mock_http
     ):
         """
@@ -92,19 +88,6 @@ class TestMoneyV22FullPipeline(unittest.TestCase):
                 )
             ]
         )
-        mock_crawlee.return_value = {
-            "total_planned": 1,
-            "successful": 1,
-            "failed": 0,
-            "items": [
-                {
-                    "url": "http://alpha-digital-test.fr/services",
-                    "html_preview": "Nous créons des sites webflow pour PME",
-                    "status_code": 200,
-                    "retries": 0
-                }
-            ]
-        }
         mock_playwright.return_value = ProviderResult(
             provider="invisible_playwright",
             status=ProviderStatus.SUCCESS,
@@ -251,24 +234,23 @@ class TestMoneyV22FullPipeline(unittest.TestCase):
         self.assertEqual(processed_lead["truth_summary"]["LEGAL_EMPLOYEES"], "VERIFIED")
         self.assertEqual(processed_lead["truth_summary"]["LEGAL_DIRECTOR"], "VERIFIED")
 
-    def test_02_crawl_planner_multi_page_integration(self):
+    def test_02_fallback_strategy_chain_integration(self):
         """
-        2. Intégration CrawlPlanner : Vérifie la planification et l'extraction multi-pages via Crawlee.
+        2. Intégration FallbackStrategy : Vérifie la chaîne de repli déterministe à 3 paliers sans Crawlee.
         """
+        strategy = FallbackStrategy()
         lead = {
             "brand_name": "Agence Webflow Bêta",
             "domain": "beta-web.fr",
-            "website": "https://beta-web.fr",
-            "main_offer": "Non vérifié",
-            "target_clients": "Non vérifié"
+            "url": "https://beta-web.fr",
+            "siren": "999888777"
         }
-        planner = CrawlPlanner()
-        planned_urls = planner.plan_urls_for_lead(lead, max_depth_urls=4)
-
-        self.assertIn("https://beta-web.fr", planned_urls)
-        self.assertIn("https://beta-web.fr/services", planned_urls)
-        self.assertIn("https://beta-web.fr/contact", planned_urls)
-        self.assertTrue(len(planned_urls) <= 4)
+        res, audit_trail = strategy.execute_inspection_chain(lead)
+        self.assertEqual(len(audit_trail), 3)
+        self.assertEqual(audit_trail[0]["tier"], 1)
+        self.assertEqual(audit_trail[1]["tier"], 2)
+        self.assertEqual(audit_trail[2]["tier"], 3)
+        self.assertEqual(audit_trail[2]["provider"], "technical_consignation")
 
     @patch("money_v2.providers.api_registry_provider.ApiRegistryProvider._run")
     @patch("money_v2.providers.http_provider.HttpProvider._run")
@@ -391,8 +373,8 @@ class TestMoneyV22FullPipeline(unittest.TestCase):
             source="external_scraping",
             source_url="http://fake-source",
             observed_at=get_current_iso_timestamp(),
-            method=ObservationMethod.BATCH_CRAWL.value,
-            provider="crawlee_provider",
+            method=ObservationMethod.DOM_INSPECTION.value,
+            provider="external_untrusted_crawler",
             provider_status=ProviderStatus.SUCCESS.value,
             evidence_text="Faux SIREN découvert",
             confidence=ConfidenceLevel.LOW.value,

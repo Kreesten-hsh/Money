@@ -5,12 +5,10 @@ from money_v2.contracts.confidence_policy import ConfidencePolicy, EmailClassifi
 from money_v2.contracts.evidence import ConfidenceLevel, Evidence, get_current_iso_timestamp
 from money_v2.contracts.provider_result import ProviderResult, ProviderTelemetry
 from money_v2.contracts.provider_status import ProviderStatus
-from money_v2.orchestrator.crawl_planner import CrawlPlanner
 from money_v2.orchestrator.fallback_strategy import FallbackStrategy
 from money_v2.orchestrator.observability import ObservabilityHub
 from money_v2.providers.api_registry_provider import ApiRegistryProvider
 from money_v2.providers.cms_provider import CmsTechnologyProvider
-from money_v2.providers.crawlee_provider import CrawleeProvider
 from money_v2.providers.dns_mx_provider import DnsMxProvider
 from money_v2.providers.firecrawl_provider import FirecrawlProvider
 from money_v2.providers.http_provider import HttpProvider
@@ -20,9 +18,9 @@ from money_v2.providers.theharvester_provider import TheHarvesterProvider
 
 class EnrichmentOrchestrator:
     """
-    Orchestrateur central d'enrichissement Money V2.2.
-    Pilote les 4 providers externes et les providers internes avec chaîne de repli,
-    Crawl Planner multi-pages, observabilité et étanchéité absolue :
+    Orchestrateur central d'enrichissement Money V2.
+    Pilote les providers externes et internes avec chaîne de repli,
+    observabilité et étanchéité absolue :
     AUCUNE donnée d'enrichissement ne peut altérer ou écraser les données légales SIRENE.
     """
 
@@ -50,21 +48,13 @@ class EnrichmentOrchestrator:
         observability_hub: Optional[ObservabilityHub] = None,
         enable_theharvester: bool = True,
         enable_playwright: bool = True,
-        enable_crawlee: bool = True,
         enable_api_registry: bool = True
     ):
         self.hub = observability_hub or ObservabilityHub()
         self.http_prov = HttpProvider()
         self.fc_prov = FirecrawlProvider()
+        self.fallback = FallbackStrategy(self.http_prov, self.fc_prov)
         self.pw_prov = InvisiblePlaywrightProvider(enabled=enable_playwright)
-        self.crawlee_prov = CrawleeProvider(enabled=enable_crawlee)
-        self.crawl_planner = CrawlPlanner(self.crawlee_prov)
-        self.fallback = FallbackStrategy(
-            self.http_prov,
-            self.fc_prov,
-            self.pw_prov,
-            self.crawlee_prov
-        )
         self.th_prov = TheHarvesterProvider(enabled=enable_theharvester)
         self.dns_prov = DnsMxProvider()
         self.cms_prov = CmsTechnologyProvider()
@@ -92,7 +82,7 @@ class EnrichmentOrchestrator:
     def enrich_lead(self, lead: Dict[str, Any]) -> Tuple[Dict[str, Any], List[Evidence]]:
         """
         Enrichit un lead unique en respectant l'ordonnancement des dépendances,
-        la chaîne de repli, le crawl approfondi et l'étanchéité légale.
+        la chaîne de repli et l'étanchéité légale.
         """
         enriched = dict(lead)
         collected_evidences: List[Evidence] = []
@@ -105,7 +95,7 @@ class EnrichmentOrchestrator:
             "decision_maker": lead.get("decision_maker")
         }
 
-        # 1. Inspection du site vitrine via FallbackStrategy (4 Paliers : HTTP -> FC -> PW -> Crawlee)
+        # 1. Inspection du site vitrine via FallbackStrategy (3 Paliers : HTTP -> Firecrawl -> Consignation)
         target_url = website or (f"https://{domain}" if domain else "")
         if target_url and (not enriched.get("main_offer") or enriched.get("main_offer") == "Non vérifié"):
             res_inspection, audit_trail = self.fallback.execute_inspection_chain(target_url, context)
@@ -113,18 +103,7 @@ class EnrichmentOrchestrator:
                 self.hub.record(res_inspection.telemetry)
             self._apply_evidences(enriched, res_inspection.evidences, collected_evidences)
 
-        # 2. Crawl approfondi multi-pages via CrawlPlanner / Crawlee si informations critiques manquantes
-        need_deep_crawl = (
-            not enriched.get("main_offer")
-            or enriched.get("main_offer") == "Non vérifié"
-            or not enriched.get("target_clients")
-            or enriched.get("target_clients") == "Non vérifié"
-        )
-        if target_url and need_deep_crawl and self.crawlee_prov.is_available():
-            deep_evidences, crawl_summary = self.crawl_planner.execute_lead_crawl(enriched, max_urls=3)
-            self._apply_evidences(enriched, deep_evidences, collected_evidences)
-
-        # 3. Résolution DNS/MX & Délivrabilité via API-mega-list (DoH) et fallback DnsMxProvider
+        # 2. Résolution DNS/MX & Délivrabilité via API-mega-list (DoH) et fallback DnsMxProvider
         if domain:
             # A. Interrogation de l'adaptateur API Registry google_dns_doh
             if self.api_registry_prov.is_available():
@@ -139,14 +118,14 @@ class EnrichmentOrchestrator:
                 self.hub.record(dns_res.telemetry)
             self._apply_evidences(enriched, dns_res.evidences, collected_evidences)
 
-        # 4. Détection d'empreinte CMS si non déjà détectée
+        # 3. Détection d'empreinte CMS si non déjà détectée
         if target_url and (not enriched.get("cms_detected") or enriched.get("cms_detected") == "Non détecté"):
             cms_res = self.cms_prov.execute(target_url, context)
             if cms_res.telemetry:
                 self.hub.record(cms_res.telemetry)
             self._apply_evidences(enriched, cms_res.evidences, collected_evidences)
 
-        # 5. OSINT passif via theHarvester pour public_professional_email si absent
+        # 4. OSINT passif via theHarvester pour public_professional_email si absent
         if domain and not enriched.get("public_professional_email"):
             th_res = self.th_prov.execute(domain, context)
             if th_res.telemetry:
@@ -162,7 +141,7 @@ class EnrichmentOrchestrator:
                 )
                 self._apply_evidences(enriched, [sorted_emails[0]], collected_evidences)
 
-        # 6. Consultation LinkedIn encadrée (ADR-008) pour dirigeant confirmé
+        # 5. Consultation LinkedIn encadrée (ADR-008) pour dirigeant confirmé via invisible_playwright_mcp
         if (
             lead.get("matching_status") == "MATCH_CONFIRMED"
             and lead.get("decision_maker_is_person") is True

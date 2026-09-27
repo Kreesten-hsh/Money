@@ -9,10 +9,25 @@
 
 ## 1. Contexte & Principes Directeurs
 
-L'outil `invisible_playwright_mcp` fournit un navigateur Chromium piloté via `patchright` (ou Playwright) configuré pour minimiser la détection automatisée (masquage de `navigator.webdriver`, courbes de souris réalistes, gestion des en-têtes et CDP patché).
+L'outil `invisible_playwright_mcp` est un serveur MCP officiel (créé par `feder-cr`) piloté sur le protocole MCP stdio via le package officiel `mcp`. Son moteur interne est un **Firefox patché furtif** (et **non Chromium**), conçu pour éliminer les détections d'automatisation (`navigator.webdriver`, timing réaliste, interactions humaines).
 
-### Capacités Réelles vs Non-Garanties (Section 5 Spécification)
+### Spécifications Techniques & Procédure de Premier Lancement
 > [!IMPORTANT]
+> - **Environnement requis** : Python 3.11+, systèmes d'exploitation **Linux** ou **Windows** uniquement.
+> - **Contrainte macOS** : `invisible-playwright` ne supporte **PAS** macOS. Si l'environnement de développement de Kreesten est sur macOS, le serveur MCP ne pourra pas tourner directement en local et devra obligatoirement être exécuté dans un conteneur/VM Linux ou sur un runner CI Linux.
+> - **Prérequis système Linux (Xvfb)** : Sous Linux, le moteur furtif Firefox nécessite un serveur d'affichage virtuel pour opérer en mode headless stealth sans déclencher les protections anti-bot. Il doit être installé via :
+>   ```bash
+>   sudo apt install -y xvfb
+>   ```
+>   *En l'absence de `Xvfb`, le serveur MCP signale : `invisible_playwright headless=True requires Xvfb. Install it: sudo apt install xvfb`.*  
+>   *(Note technique : la variable d'environnement `INVPW_TRUE_HEADLESS=1` permet d'activer le mode headless natif sans Xvfb).*
+> - **Procédure de premier lancement** : Le binaire Firefox patché (~250 Mo) n'est pas embarqué à l'installation. Il doit être téléchargé une première fois via la commande :
+>   ```bash
+>   uvx invisible-playwright fetch
+>   ```
+> - **Exécution isolée via MCP** : Le provider Money `InvisiblePlaywrightProvider` n'importe pas directement de bibliothèque Playwright dans le code applicatif. Il invoque `mcp_playwright_client.py` via `uv run --with mcp --python 3.11 python3 mcp_playwright_client.py <args>` qui instancie le serveur MCP `uvx invisible-playwright-mcp` via stdio.
+
+### Capacités Réelles vs Non-Garanties
 > - **Capacités Réelles** : Permet de franchir des challenges anti-bots basiques ou d'accéder à des pages d'accueil et annuaires publics rejetant les requêtes HTTP brutes (ex: 403 Forbidden sur `urllib`).
 > - **NON-GARANTIE ABSOLUE** : Ne garantit en aucun cas un contournement à 100% de Cloudflare Turnstile, DataDome, Akamai ou de tout système de détection comportementale avancée.
 > - **Murs d'authentification** : Ne permet aucun contournement des pages nécessitant un compte connecté ou une authentification obligatoire (login wall).
@@ -29,19 +44,19 @@ Conformément à **ADR-008** et à la politique de conformité RGPD (`docs/DATA_
 
 ## 2. Déclencheurs Opérationnels (Triggers)
 
-L'opérateur IA invoque `invisible_playwright_mcp` **exclusivement** sous l'un des deux déclencheurs ci-dessous.
+L'opérateur IA invoque les outils d'investigation avancée **exclusivement** sous l'un des trois déclencheurs ci-dessous.
 
 ```
                            [Événement Pipeline]
                                      │
-           ┌─────────────────────────┴─────────────────────────┐
-           ▼                                                   ▼
-[Trigger A : Repli Site / Annuaire]           [Trigger B : Consultation LinkedIn]
-- Échec HTTP / 403 / Challenge WAF           - Lead déjà MATCH_CONFIRMED SIRENE
-- Site agence ou annuaire pro                 - Profil public dirigeant physique
-- Extraction : Offre, Mentions, Équipe        - Extraction : Activité éditoriale (Oui/Non)
-           │                                                   │
-           └─────────────────────────┬─────────────────────────┘
+           ┌─────────────────────────┼─────────────────────────┐
+           ▼                         ▼                         ▼
+[Trigger A : Repli Site/Annuaire]  [Trigger B : LinkedIn]   [Trigger C : Agent-Reach]
+- Échec HTTP / 403 / WAF           - Lead MATCH_CONFIRMED   - Recherche contextuelle
+- Site agence ou annuaire pro      - Profil public dirigeant  opérateur (ponctuelle)
+- Extraction : Offre, Mentions     - Activité éditoriale    - Multi-plateformes OSINT
+           │                         │                         │
+           └─────────────────────────┼─────────────────────────┘
                                      ▼
                       [data/mcp_audit_staging.json]
                  (INTERDICTION : Champs légaux / effectifs)
@@ -110,6 +125,36 @@ L'opérateur IA invoque `invisible_playwright_mcp` **exclusivement** sous l'un d
   "source_url": "https://www.linkedin.com/in/jean-dupont-agence",
   "evidence_text": "Post public observé daté du 12/09/2026 traitant des tendances CMS 2026.",
   "collected_at": "2026-09-27T14:32:00Z"
+}
+```
+
+---
+
+### Trigger C : Recherche Contextuelle Agent-Reach (`agent_reach_research`)
+
+#### Condition d'activation
+- L'opérateur (ou l'agent IA en session interactive) utilise le skill `agent-reach` pour mener une investigation contextuelle ponctuelle sur une agence web ou un dirigeant difficile à qualifier par les méthodes conventionnelles.
+- **RÈGLE CRITIQUE** : `agent-reach` est un outil d'assistance opérateur piloté par jugement, et **NON** un provider synchrone intégré dans une boucle batch automatisée.
+- Les résultats ne sont persistés dans `data/mcp_audit_staging.json` que lorsque l'opérateur juge l'observation probante, vérifiable et directement utile à l'offre (*AI Lead Intelligence* ou *Founder Ghostwriting*).
+
+#### Cibles autorisées
+- Pages d'entreprises publiques, posts publics, articles de presse spécialisés ou répertoires professionnels indexés.
+- Cible formellement exclue : messages privés, profils restreints ou données sous consentement préalable.
+
+#### Données extractibles
+- Positionnement d'agence ou spécialisation observable (`main_offer`).
+- Typologie de clients observée (`target_clients`).
+
+#### Format d'écriture dans `data/mcp_audit_staging.json`
+```json
+{
+  "domain": "agence-exemple.fr",
+  "trigger_type": "agent_reach_research",
+  "field_target": "main_offer",
+  "extracted_value": "Agence spécialisée en refonte Webflow et SEO B2B",
+  "source_url": "https://www.linkedin.com/company/agence-exemple",
+  "evidence_text": "Présentation d'entreprise observée via recherche opérateur agent-reach.",
+  "collected_at": "2026-09-27T15:00:00Z"
 }
 ```
 

@@ -66,8 +66,8 @@ python3 harvest_osint.py --offset 0 --limit 30
 python3 enrich_leads_osint.py
 ```
 - **Rôle** :
-  - Orchestration modulaire via `money_v2` pilotant `HttpProvider`, `FirecrawlProvider`, `InvisiblePlaywrightProvider` (`patchright`), `TheHarvesterProvider`, `DnsMxProvider`, `CmsTechnologyProvider`, `CrawleeProvider` et `ApiRegistryProvider`.
-  - Chaîne de repli déterministe pour l'audit web : `HTTP -> Firecrawl -> Invisible Playwright -> ERROR`.
+  - Orchestration modulaire via `money_v2` pilotant `HttpProvider`, `FirecrawlProvider`, `InvisiblePlaywrightProvider` (serveur MCP officiel `uvx invisible-playwright-mcp` en sous-processus isolé), `TheHarvesterProvider`, `DnsMxProvider`, `CmsTechnologyProvider` et `ApiRegistryProvider`.
+  - Chaîne de repli déterministe pour l'audit web : `HttpProvider (1) -> FirecrawlProvider (2) -> Consignation Technique (3)`. Invisible Playwright intervient hors chaîne synchrone pour les cas spécifiques et staging d'audit.
   - Détection CMS observable et résolution MX en 3 paliers (DNS UDP RFC 1035, `getaddrinfo`, et DoH HTTPS `dns.google` pur stdlib).
   - Enregistrement universel d'évidences à 11 dimensions et persistance télémétrique (`data/telemetry_events.json`).
   - Barrière d'étanchéité inviolable (`LegalReconciliationLayer`) interdisant toute modification des champs SIRENE Niveau 1/2.

@@ -22,12 +22,12 @@ Chaque source d'information ou outil de collecte est encapsulé derrière l'inte
 └──────────────────┘    └──────────────────┘    └──────────────────┘
          ▼                       ▼                        ▼
 ┌──────────────────┐    ┌──────────────────┐    ┌──────────────────┐
-│  DnsMxProvider   │    │  CmsTechProvider │    │ CrawleeProvider  │
+│  DnsMxProvider   │    │  CmsTechProvider │    │FirecrawlProvider │
 └──────────────────┘    └──────────────────┘    └──────────────────┘
-         ▼                       ▼
-┌──────────────────┐    ┌──────────────────┐
-│FirecrawlProvider │    │ApiRegistryProv.  │
-└──────────────────┘    └──────────────────┘
+         ▼
+┌──────────────────┐
+│ApiRegistryProv.  │
+└──────────────────┘
 ```
 
 ---
@@ -45,9 +45,9 @@ Chaque source d'information ou outil de collecte est encapsulé derrière l'inte
 
 ---
 
-## 3. Chaîne de Repli Déterministe pour l'Audit de Site
+## 3. Chaîne de Repli Déterministe pour l'Audit de Site (3 Paliers)
 
-Lors de l'inspection de l'offre d'une agence (`main_offer`) ou de sa clientèle cible (`target_clients`), l'orchestrateur sollicite `FallbackStrategy` qui enchaîne séquentiellement 4 paliers d'exécution :
+Lors de l'inspection de l'offre d'une agence (`main_offer`) ou de sa clientèle cible (`target_clients`), l'orchestrateur sollicite `FallbackStrategy` qui enchaîne séquentiellement 3 paliers déterministes :
 
 ```
 [Palier 1 : HttpProvider]
@@ -61,34 +61,28 @@ Lors de l'inspection de l'offre d'une agence (`main_offer`) ou de sa clientèle 
   - Déclencheurs de repli : clé manquante, quota dépassé, échec API.
          │
          ▼ (si échec ou absent)
-[Palier 3 : InvisiblePlaywrightProvider (`patchright_local`)]
-  - Navigateur Chromium furtif piloté par patchright localement (zéro dépendance MCP distante).
-  - Élimination des empreintes WebDriver et automatisation humaine des trajectoires.
-  - Limité aux sites d'agences ou annuaires en lecture seule (ADR-008).
-         │
-         ▼ (si échec ou timeout)
-[Palier 4 : CrawleeProvider]
-  - Exploration multi-pages structurée avec file d'attente, retries et limitation de concurrence.
-  - Moissonnage de secours sur les sous-pages de services.
-         │
-         ▼ (si épuisement des 4 paliers)
-[Palier 5 : Consignation Technique (ERROR / BLOCKED / TIMEOUT)]
+[Palier 3 : Consignation Technique (BLOCKED / ERROR / TIMEOUT)]
   - Enregistrement du statut réel et de la cause safe dans la télémétrie.
   - Aucune invention de données ni masque de panne.
 ```
 
+> [!NOTE]
+> **Rôle d'InvisiblePlaywrightProvider et d'agent-reach** :  
+> L'enrichissement via `InvisiblePlaywrightProvider` (serveur MCP officiel `uvx invisible-playwright-mcp` piloté via client stdio isolé `mcp_playwright_client.py`) reste **HORS** de cette chaîne HTTP synchrone de base. Il intervient sur les cas spécifiques (annuaires protégés, mentions légales bloquées, consultation éditoriale LinkedIn ADR-008) et alimente le dataset via le contrat d'audit staging (`data/mcp_audit_staging.json`).  
+> De même, `agent-reach` est un outil d'investigation opérateur déclenché sur jugement et alimente le staging sous `trigger_type="agent_reach_research"`.
+
 ---
 
-## 4. Exploration Multi-Pages & CrawlPlanner
+## 4. Isolation du Client MCP Stdio (`mcp_playwright_client.py`)
 
-Le module `CrawlPlanner` (`money_v2/orchestrator/crawl_planner.py`) optimise la découverte d'informations manquantes :
-1. **Planification Ciblée** : Détermine dynamiquement la liste d'URLs à explorer pour chaque lead :
-   - `/` : Accueil (offre générique, footer, téléphone).
-   - `/services`, `/offres`, `/expertises` : Prestations détaillées et mots-clés d'offres web.
-   - `/contact` : Formulaire, adresses et emails de contact.
-   - `/mentions-legales` : Rapprochement d'identité juridique et SIREN.
-2. **Exécution Industrielle** : Déléguée à `CrawleeProvider.crawl_batch()` avec file d'attente FIFO, retries (2 max) et limitation de concurrence.
-3. **Attribution Structurée des Évidences** : Chaque extrait d'offre, de cible ou d'email est tracé avec l'URL exacte de la sous-page où il a été observé (`source_url`).
+Afin de préserver l'étanchéité du cœur applicatif Python (zéro dépendance externe dans `requirements.txt`) :
+1. **Sous-processus Isolé** : `InvisiblePlaywrightProvider` exécute `uv run --with mcp --python 3.11 python3 mcp_playwright_client.py <args>`.
+2. **Protocole MCP Stdio** : Le script communique directement avec le serveur `uvx invisible-playwright-mcp` via les flux standard `stdio`.
+3. **Moteur Furtif Spécifique** : Le serveur instancie le moteur Firefox patché stealth (`firefox-151.0-stealth`).
+4. **Garde-fous Invariants** :
+   - Quota strict ADR-008 (≤ 5 consultations/jour tracé).
+   - Rejet immédiat de toute extraction de champs interdits (`FORBIDDEN_FIELDS` : `company_size`, `decision_maker_identity`).
+   - Obligation d'un matching SIRENE confirmé (`MATCH_CONFIRMED`) pour la consultation LinkedIn.
 
 ---
 

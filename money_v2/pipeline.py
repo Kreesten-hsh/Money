@@ -39,7 +39,7 @@ class MoneyPipelineV2:
         """
         Traite un lead à travers l'ensemble des couches de l'architecture.
         """
-        # 1. Orchestration multi-providers (HTTP, Playwright, theHarvester, Crawlee, API Registry)
+        # 1. Orchestration multi-providers (HTTP, Firecrawl, theHarvester, API Registry)
         enriched_lead, evidences = self.orchestrator.enrich_lead(lead)
 
         # 2. Réconciliation stricte et verrouillage d'étanchéité légale

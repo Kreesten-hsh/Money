@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 """
-harvest_osint.py — Orchestrateur Automatisé theHarvester (Pipeline Money)
+[DEPRECATED — ARCHITECTURE V1] harvest_osint.py — Orchestrateur theHarvester Staging
 
-Rôle :
-1. Lit les domaines des leads du batch (--offset / --limit).
-2. Extrait dynamiquement les sources passives autorisées depuis config/theHarvester.yaml.
-3. Exécute theHarvester en CLI locale via subprocess (zéro dépendance pip ajoutée).
-4. Parse la sortie JSON générée et produit data/osint_emails_staging.json.
-5. Échoue immédiatement avec message explicite si le binaire theHarvester est absent du PATH.
+AVERTISSEMENT D'ARCHITECTURE :
+Ce script autonome écrivait un fichier staging intermédiaire data/osint_emails_staging.json.
+Dans l'architecture V2 intégrée, theHarvester est encapsulé dans :
+  `money_v2/providers/theharvester_provider.py`
+et piloté directement par `EnrichmentOrchestrator` au sein de `run_pipeline_v2.py`.
+Ce script est conservé uniquement pour la rétro-compatibilité manuelle et est DÉPRÉCIÉ.
 
-Usage :
+Usage historique :
   python3 harvest_osint.py [--offset 0] [--limit 30] [--config config/theHarvester.yaml]
 """
 
