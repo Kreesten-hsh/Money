@@ -158,6 +158,35 @@ def resolve_mx_records(domain: str, timeout: float = 2.0) -> Tuple[bool, List[st
     except Exception:
         pass
 
+    # Palier 3 : Fallback DNS-over-HTTPS (DoH) via dns.google (pur stdlib urllib.request, gratuit, sans clé)
+    # Justification : stdlib insuffisant sur réseaux filtrant UDP:53
+    try:
+        doh_url = f"https://dns.google/resolve?name={urllib.parse.quote(domain)}&type=MX"
+        req = urllib.request.Request(
+            doh_url,
+            headers={
+                'Accept': 'application/dns-json',
+                'User-Agent': 'Mozilla/5.0 (compatible; LeadIntelligence/2.0; +https://github.com/Kreesten-hsh/Money)'
+            }
+        )
+        ctx = ssl.create_default_context()
+        with urllib.request.urlopen(req, timeout=timeout, context=ctx) as resp:
+            if resp.status == 200:
+                payload = json.loads(resp.read().decode('utf-8'))
+                answers = payload.get('Answer', [])
+                doh_hosts = []
+                for ans in answers:
+                    if ans.get('type') == 15:  # Type MX
+                        data_val = ans.get('data', '').strip()
+                        parts = data_val.split()
+                        host_val = parts[-1].rstrip('.') if parts else ''
+                        if host_val:
+                            doh_hosts.append(host_val)
+                if doh_hosts:
+                    return True, doh_hosts
+    except Exception:
+        pass
+
     try:
         socket.gethostbyname(domain)
         return True, [f"host.{domain}"]
@@ -231,12 +260,84 @@ def inspect_cms(url: str, timeout: float = 3.0) -> Tuple[str, str, str]:
     return "Inconnu", "", ""
 
 
+def ingest_mcp_staging(
+    leads: List[Dict[str, Any]],
+    mcp_staging_path: Optional[Path] = None,
+    now_ts: Optional[str] = None
+) -> None:
+    """
+    Ingère les données du staging MCP (invisible_playwright_mcp) avec traçabilité stricte.
+    Règles d'or d'étanchéité (ADR-008 & Niveau 4 vs Niveau 1/2) :
+    1. Alimente main_offer / main_offer_source / main_offer_evidence UNIQUEMENT si absent ou non vérifié.
+    2. Renseigne le statut informatif decision_maker_linkedin_activity (booléen) + source + horodatage.
+    3. N'altère JAMAIS decision_maker, decision_maker_role, company_size, company_size_code.
+    """
+    mcp_file = mcp_staging_path or (BASE_DIR / 'data' / 'mcp_audit_staging.json')
+    mcp_by_domain: Dict[str, List[Dict[str, Any]]] = {}
+
+    if mcp_file.exists():
+        try:
+            with open(mcp_file, 'r', encoding='utf-8') as f:
+                staging_content = json.load(f)
+                entries = staging_content.get('entries', []) if isinstance(staging_content, dict) else staging_content
+                for entry in entries:
+                    dom = extract_canonical_domain(entry.get('domain', ''))
+                    if dom:
+                        mcp_by_domain.setdefault(dom, []).append(entry)
+                    p_url = entry.get('profile_url', '').strip()
+                    if p_url:
+                        mcp_by_domain.setdefault(p_url.lower(), []).append(entry)
+        except Exception:
+            mcp_by_domain = {}
+
+    timestamp = now_ts or get_current_iso_timestamp()
+
+    for lead in leads:
+        website = lead.get('website', '')
+        canonical_site_domain = extract_canonical_domain(website)
+        domain_entries = mcp_by_domain.get(canonical_site_domain, [])
+
+        # 1. Repli main_offer si absent après audit direct
+        curr_offer = str(lead.get('main_offer', '')).strip()
+        offer_is_missing = (not curr_offer or curr_offer in ('Non extrait', 'Inconnu', 'Non vérifié', 'Non renseigné'))
+
+        if offer_is_missing and domain_entries:
+            for d_entry in domain_entries:
+                if d_entry.get('field_target') == 'main_offer' or d_entry.get('trigger_type') == 'annuaire_fallback':
+                    val = str(d_entry.get('extracted_value', '')).strip()
+                    if val and val.lower() not in ('inconnu', 'non extrait'):
+                        lead['main_offer'] = val
+                        lead['main_offer_source'] = str(d_entry.get('source_url', '')).strip()
+                        lead['main_offer_evidence'] = str(d_entry.get('evidence_text', '')).strip()
+                        lead['main_offer_checked_at'] = d_entry.get('collected_at') or timestamp
+                        break
+
+        # 2. Renseignement de l'activité éditoriale LinkedIn (champs informatifs)
+        linkedin_activity = False
+        linkedin_source = ""
+        linkedin_checked_at = ""
+
+        if domain_entries:
+            for d_entry in domain_entries:
+                if d_entry.get('field_target') == 'decision_maker_linkedin_activity' or d_entry.get('trigger_type') == 'linkedin_consultation':
+                    raw_val = str(d_entry.get('extracted_value', '')).strip().lower()
+                    linkedin_activity = raw_val in ('true', '1', 'oui', 'yes')
+                    linkedin_source = str(d_entry.get('source_url', '')).strip()
+                    linkedin_checked_at = d_entry.get('collected_at') or timestamp
+                    break
+
+        lead['decision_maker_linkedin_activity'] = linkedin_activity
+        lead['decision_maker_linkedin_source'] = linkedin_source
+        lead['decision_maker_linkedin_checked_at'] = linkedin_checked_at
+
+
 def enrich_leads(
     input_json_path: Path,
     input_csv_path: Path,
     output_json_path: Path,
     output_csv_path: Path,
     staging_file_path: Optional[Path] = None,
+    mcp_staging_file_path: Optional[Path] = None,
     offset: int = 0,
     limit: int = 30,
     skip_network: bool = False
@@ -249,6 +350,13 @@ def enrich_leads(
 
     with open(input_json_path, 'r', encoding='utf-8') as f:
         leads: List[Dict[str, Any]] = json.load(f)
+
+    # Initialisation uniforme des nouveaux champs informatifs pour tous les leads
+    for lead in leads:
+        if 'decision_maker_linkedin_activity' not in lead:
+            lead['decision_maker_linkedin_activity'] = False
+            lead['decision_maker_linkedin_source'] = ""
+            lead['decision_maker_linkedin_checked_at'] = ""
 
     # Chargement du staging OSINT theHarvester si disponible
     staging_entries: Dict[str, Dict[str, Any]] = {}
@@ -337,6 +445,11 @@ def enrich_leads(
         lead['cms_evidence'] = cms_ev
         lead['cms_checked_at'] = now_ts
 
+    # -------------------------------------------------------------
+    # 3. Ingestion Staging MCP (Repli Offre & Activité LinkedIn)
+    # -------------------------------------------------------------
+    ingest_mcp_staging(batch_leads, mcp_staging_path=mcp_staging_file_path, now_ts=now_ts)
+
     # Réécriture déterministe
     output_json_path.parent.mkdir(parents=True, exist_ok=True)
     with open(output_json_path, 'w', encoding='utf-8') as f:
@@ -370,6 +483,7 @@ def main():
     parser.add_argument('--output-json', type=str, default=str(BASE_DIR / 'data' / 'top30_leads_requalified.json'))
     parser.add_argument('--output-csv', type=str, default=str(BASE_DIR / 'data' / 'top30_leads_requalified.csv'))
     parser.add_argument('--staging-file', type=str, default=str(BASE_DIR / 'data' / 'osint_emails_staging.json'))
+    parser.add_argument('--mcp-staging-file', type=str, default=str(BASE_DIR / 'data' / 'mcp_audit_staging.json'))
     parser.add_argument('--skip-network', action='store_true', help="Désactive les requêtes réseau externes (tests unitaires)")
 
     args = parser.parse_args()
@@ -381,6 +495,7 @@ def main():
         output_json_path=Path(args.output_json),
         output_csv_path=Path(args.output_csv),
         staging_file_path=Path(args.staging_file) if args.staging_file else None,
+        mcp_staging_file_path=Path(args.mcp_staging_file) if args.mcp_staging_file else None,
         offset=args.offset,
         limit=args.limit,
         skip_network=args.skip_network
@@ -390,3 +505,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+

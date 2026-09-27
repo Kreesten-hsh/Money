@@ -501,6 +501,39 @@ def run_qa_checks(csv_path: Path = None, json_path: Path = None, md_path: Path =
                 c23.append(f"Ligne {idx:02d} [{l.get('brand_name')}]: CMS détecté ('{cms}') avec cms_checked_at non-ISO.")
     record_check("Contrôle 23 (Preuve & Auditabilité Empreinte CMS)", c23)
 
+    # 24. Étanchéité Staging MCP vs Registre Légal (ADR-008 & Niveau 4 vs Niveau 1/2)
+    c24 = []
+    mcp_staging_file = BASE_DIR / 'data' / 'mcp_audit_staging.json'
+    mcp_prohibited_values: Set[str] = set()
+    if mcp_staging_file.exists():
+        try:
+            with open(mcp_staging_file, 'r', encoding='utf-8') as f:
+                mcp_data = json.load(f)
+                entries = mcp_data.get('entries', []) if isinstance(mcp_data, dict) else mcp_data
+                for entry in entries:
+                    val = str(entry.get('extracted_value', '')).strip()
+                    if val and len(val) >= 4 and val.lower() not in ('true', 'false', 'inconnu', 'non extrait', 'non vérifié', 'none', 'null'):
+                        mcp_prohibited_values.add(val.lower())
+        except Exception:
+            pass
+
+    for idx, l in enumerate(leads, 1):
+        dm = str(l.get('decision_maker', '')).strip().lower()
+        dm_role = str(l.get('decision_maker_role', '')).strip().lower()
+        c_size = str(l.get('company_size', '')).strip().lower()
+        c_size_code = str(l.get('company_size_code', '')).strip().lower()
+
+        for prohibited in mcp_prohibited_values:
+            if prohibited in dm or dm == prohibited:
+                c24.append(f"Ligne {idx:02d} [{l.get('brand_name')}]: Fuite MCP staging dans decision_maker ('{l.get('decision_maker')}').")
+            if prohibited in dm_role or dm_role == prohibited:
+                c24.append(f"Ligne {idx:02d} [{l.get('brand_name')}]: Fuite MCP staging dans decision_maker_role ('{l.get('decision_maker_role')}').")
+            if prohibited in c_size or c_size == prohibited:
+                c24.append(f"Ligne {idx:02d} [{l.get('brand_name')}]: Fuite MCP staging dans company_size ('{l.get('company_size')}').")
+            if prohibited in c_size_code or c_size_code == prohibited:
+                c24.append(f"Ligne {idx:02d} [{l.get('brand_name')}]: Fuite MCP staging dans company_size_code ('{l.get('company_size_code')}').")
+    record_check("Contrôle 24 (Étanchéité Staging MCP vs Registre Légal)", c24)
+
     all_passed = all(results.values())
     return all_passed, results, failures
 
@@ -662,6 +695,14 @@ def run_negative_tests() -> Tuple[bool, int, int]:
                 "cms_evidence": ""
             }),
             "expected_fail": "Contrôle 23 (Preuve & Auditabilité Empreinte CMS)"
+        },
+        # ÉTANCHÉITÉ MCP STAGING (Contrôle 24)
+        {
+            "name": "MCP 1 : Valeur issue du staging MCP ayant fuité dans decision_maker légal",
+            "modify": lambda rows: rows[0].update({
+                "decision_maker": "Création de sites web vitrines et e-commerce sur-mesure"
+            }),
+            "expected_fail": "Contrôle 24 (Étanchéité Staging MCP vs Registre Légal)"
         }
     ]
 
@@ -737,7 +778,7 @@ def run_negative_tests() -> Tuple[bool, int, int]:
     return all_passed, passed_count, total_count
 
 if __name__ == '__main__':
-    print("=== DÉMARRAGE AUDIT QA OFFICIEL (23 CONTRÔLES MÉTIER) ===")
+    print("=== DÉMARRAGE AUDIT QA OFFICIEL (24 CONTRÔLES MÉTIER) ===")
     passed, results, failures = run_qa_checks()
 
     for check_name, check_ok in results.items():
@@ -748,7 +789,7 @@ if __name__ == '__main__':
                 print(f"       -> {fail_msg}")
 
     print("-" * 50)
-    print(f"Bilan Dataset Réel : {sum(results.values())}/23 CONTRÔLES VALIDÉS.")
+    print(f"Bilan Dataset Réel : {sum(results.values())}/24 CONTRÔLES VALIDÉS.")
 
     neg_ok, neg_passed, neg_total = run_negative_tests()
     print("-" * 50)

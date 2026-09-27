@@ -35,6 +35,9 @@ Chaque enregistrement du dataset de prospection doit respecter strictement les a
 | `decision_maker_is_person` | boolean | OUI | `True` si le décisionnaire retenu est une personne physique, `False` si personne morale ou non identifié |
 | `decision_maker_source` | string (URL) | NON | URL officielle prouvant l'identité légale (Annuaire des Entreprises) |
 | `decision_maker_checked_at` | string (ISO 8601) | OUI | Horodatage dynamique UTC de l'extraction du dirigeant |
+| `decision_maker_linkedin_activity` | boolean | NON | Indicateur informatif d'activité éditoriale publique récente (ADR-008). `True` si publications observées, `False` sinon. Ne modifie jamais l'identité ni le rôle légal |
+| `decision_maker_linkedin_source` | string (URL) | NON | URL du profil public LinkedIn audité en lecture seule (sans compte connecté) |
+| `decision_maker_linkedin_checked_at` | string (ISO 8601) | NON | Horodatage dynamique UTC de la consultation publique |
 | `public_professional_email` | string | NON | Email professionnel public (ou `Non extrait`). Interdiction d'adresses privées. Doit concorder avec le domaine de l'agence |
 | `email_source` | string (URL) | NON | Source exacte de découverte (ex: `https://agence.fr/contact/`, `crt.sh`, `Mentions Légales`). Obligatoire si email présent |
 | `email_evidence` | string | NON | Extrait textuel d'apparition ou preuve d'enregistrement MX actif (ex: `Enregistrement MX vérifié : mail.agence.fr`) |

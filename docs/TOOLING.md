@@ -13,6 +13,7 @@
 | **Notion MCP** | Interface de restitution et Lead Intelligence Room client | Inclus | Risque de saturation en cas de design surchargé | **USE NOW** | Interface premium, claire et immédiatement partageable avec un client pilote. |
 | **Scrapling** | Scraping de contournement si blocage ou rendu complexe | 0 € (Open source Python) | Complexité supérieure à un fetch simple | **TEST** | À activer uniquement en repli si Firecrawl échoue sur un site stratégique. |
 | **theHarvester (CLI local)** | Découverte passive d'emails professionnels publics et hôtes DNS | 0 € (Sources ouvertes passives) | Limité aux sources gratuites. Exécuté hors code (`uv tool`) | **USE NOW** | Configuré via `config/theHarvester.yaml` pour alimenter `data/osint_emails_staging.json`. |
+| **invisible_playwright_mcp** | Navigation furtive en lecture seule, contournement WAF & repli annuaires | 0 € (Open source local) | Réservé à l'opérateur IA en repli (ADR-008). Zéro compte connecté, débit ≤ 5/jour | **USE NOW** | Encadré par ADR-008 et consigné dans [docs/OPERATOR_RUNBOOK_MCP.md](file:///home/hasashi/Bureau/Money/docs/OPERATOR_RUNBOOK_MCP.md). |
 | **Proxies Résidentiels Payants** | Évitement de blocages à grande échelle | ~50 à 150 € / mois | Dépense inutile au stade MVP (< 500 leads) | **EXCLUDE** | Banni : non justifié tant qu'aucun client n'a payé. |
 | **OpenOutreach / Mass Emailing Automatisé** | Séquences de cold email automatisées | Variable | Risque élevé de spam, dégradation de domaine | **EXCLUDE** | Banni : la prospection MVP doit rester 100% manuelle et personnalisée. |
 | **Scraping LinkedIn massif / non régulé** | Collecte massive de profils personnels | Risque légal / blocage | Violation des CGU et des règles du projet | **EXCLUDE** | Strictement interdit par ADR-003. La consultation passive unitaire est encadrée par ADR-008. |
@@ -50,17 +51,28 @@ Tout ajout d'outil payant ou complexe exige au préalable :
   7. **Scoring Découplé & Plafonds** : Lead Gen (0-100), Ghostwriting (0/100 neutralisé en Phase 1), Confidence (0-100 avec plafond strict à 60 si non vérifié et 40 si matching incertain).
   8. **Justifications `reasons`** : Décomposition explicite des composantes Lead Gen, GW et Confidence avec renvoi aux sources.
 
+### `harvest_osint.py`
+- **Rôle** : Orchestrateur automatisé de theHarvester en ligne de commande locale pour le moissonnage d'emails passifs gratuits.
+- **Entrées** : `data/top30_leads_requalified.json`, `config/theHarvester.yaml`.
+- **Options CLI** : `--offset` (défaut: 0), `--limit` (défaut: 30), `--config`, `--output-staging`.
+- **Sortie** : `data/osint_emails_staging.json`.
+- **Règles appliquées** :
+  1. **Pur Subprocess & Zéro Dépendance** : Exécuté exclusivement via les modules standard Python (`subprocess`, `json`, `argparse`). Aucune dépendance externe ajoutée.
+  2. **Extraction Dynamique des Sources** : Lecture de `active_sources` depuis `config/theHarvester.yaml` sans duplication ni hardcoding.
+  3. **Contrôle d'Intégrité Binaire** : Vérification de la présence de `theHarvester` dans le PATH (installé via `uv tool install theHarvester`). En cas d'absence, arrêt immédiat avec erreur explicite et refus de générer un staging vide.
+
 ### `enrich_leads_osint.py`
-- **Rôle** : Enrichissement OSINT déterministe, validation MX native et traçabilité des emails et CMS.
-- **Entrées** : `data/top30_leads_requalified.json` (ou `.csv`), `data/osint_emails_staging.json`.
-- **Options CLI** : `--offset` (défaut: 0) et `--limit` (défaut: 30), `--staging-file`.
+- **Rôle** : Enrichissement OSINT déterministe, validation MX native, repli MCP et traçabilité des emails et CMS.
+- **Entrées** : `data/top30_leads_requalified.json` (ou `.csv`), `data/osint_emails_staging.json`, `data/mcp_audit_staging.json`.
+- **Options CLI** : `--offset` (défaut: 0), `--limit` (défaut: 30), `--staging-file`, `--mcp-staging-file`.
 - **Sorties** : `data/top30_leads_requalified.csv` et `data/top30_leads_requalified.json` enrichis.
 - **Règles appliquées** :
   1. **Concordance Stricte de Domaine** : Le domaine de l'adresse email candidate doit correspondre strictement au nom de domaine du site audité en Niveau 1.
-  2. **Résolution MX Native (Stdlib Python)** : Requête DNS UDP / getaddrinfo vérifiant l'existence réelle d'un serveur de messagerie actif avant d'enregistrer l'adresse.
+  2. **Résolution MX Native & Fallback DoH** : Requête DNS UDP / getaddrinfo vérifiant l'existence réelle d'un serveur de messagerie actif, complétée d'un palier 3 DNS-over-HTTPS (DoH via `dns.google` pur `urllib.request`). Justification technique : *stdlib insuffisant sur réseaux filtrant UDP:53*.
   3. **Détection CMS Observable** : Identification par signatures HTML (`meta[name=generator]`, chemins de thèmes) et en-têtes HTTP (`X-Powered-By`).
-  4. **Triplet de Preuve Structuré** : Chaque email ou CMS enrichi reçoit obligatoirement son URL source, son extrait de preuve textuel et son horodatage ISO 8601 dynamique.
-  5. **Non-Régression du Scoring** : Les scores Lead Gen, Ghostwriting et Confiance demeurent strictement inchangés.
+  4. **Ingestion Staging MCP (`invisible_playwright_mcp`)** : Repli d'offre principale si absent et capture d'activité éditoriale LinkedIn en lecture seule. Étanchéité absolue (Contrôle QA 24) : interdiction formelle d'altérer les attributs légaux `decision_maker` ou `company_size`.
+  5. **Triplet de Preuve Structuré** : Chaque email, CMS ou donnée MCP enrichie reçoit obligatoirement son URL source, son extrait de preuve textuel et son horodatage ISO 8601 dynamique.
+  6. **Non-Régression du Scoring** : Les scores Lead Gen, Ghostwriting et Confiance demeurent strictement inchangés.
 
 ### `build_notion_markdown.py`
 - **Rôle** : Restitution client et génération de la Lead Intelligence Room.

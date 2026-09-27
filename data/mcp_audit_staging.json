@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.0",
+  "contract_type": "MCP_AUDIT_STAGING",
+  "generated_by": "invisible_playwright_mcp (Opérateur IA — Consultation En Lecture Seule)",
+  "generated_at": "2026-09-27T12:00:00Z",
+  "entries": [
+    {
+      "domain": "kreesten-design.fr",
+      "trigger_type": "annuaire_fallback",
+      "field_target": "main_offer",
+      "extracted_value": "Création de sites web vitrines et e-commerce sur-mesure",
+      "source_url": "https://www.pagesjaunes.fr/pros/kreesten-design",
+      "evidence_text": "Extrait observable : 'Conception de sites vitrines et e-commerce sur mesure pour PME et artisans.'",
+      "collected_at": "2026-09-27T12:00:00Z"
+    },
+    {
+      "profile_url": "https://www.linkedin.com/in/exemple-dirigeant-agence",
+      "trigger_type": "linkedin_consultation",
+      "field_target": "decision_maker_linkedin_activity",
+      "extracted_value": "True",
+      "source_url": "https://www.linkedin.com/in/exemple-dirigeant-agence",
+      "evidence_text": "Publication publique observée datée de moins de 30 jours sur le développement d'agences.",
+      "collected_at": "2026-09-27T12:00:00Z"
+    }
+  ]
+}

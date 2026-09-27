@@ -53,15 +53,20 @@ python3 requalify_leads.py
   - Calcule les scores découplés (`lead_gen_score`, `ghostwriting_score`, `confidence_score`) et génère les justifications textuelles (`reasons`).
 - **Sorties** : `data/top30_leads_requalified.json` et `data/top30_leads_requalified.csv`.
 
-### 3. Enrichissement OSINT Déterministe (Emails & Empreinte CMS)
+### 3. Orchestration theHarvester & Enrichissement OSINT Déterministe
 ```bash
+# Optionnel : génération du staging emails via theHarvester CLI (si installé via uv tool install theHarvester)
+python3 harvest_osint.py --offset 0 --limit 30
+
+# Ingestion et enrichissement déterministe (emails, MX, CMS, MCP staging)
 python3 enrich_leads_osint.py
 ```
 - **Rôle** :
-  - Consomme le staging passif issu de theHarvester (`data/osint_emails_staging.json`).
-  - Valide les emails professionnels par résolution MX native en bibliothèque standard Python et contrôle de concordance stricte de domaine.
+  - Orchestration de theHarvester via subprocess stdlib pur (`harvest_osint.py`).
+  - Consomme les stagings passifs (`data/osint_emails_staging.json` et `data/mcp_audit_staging.json`).
+  - Valide les emails professionnels par résolution MX native en 3 paliers (DNS UDP brut RFC 1035, `getaddrinfo`, et DoH HTTPS `dns.google` pur stdlib) et contrôle de concordance stricte de domaine.
   - Détecte l'empreinte CMS de façon observable via signatures HTML et en-têtes HTTP.
-  - Renseigne le triplet officiel de traçabilité (`source`, `evidence`, `checked_at`).
+  - Renseigne le triplet officiel de traçabilité (`source`, `evidence`, `checked_at`) et l'activité LinkedIn consultative (ADR-008) sans jamais altérer les registres légaux.
 - **Sorties** : `data/top30_leads_requalified.json` et `data/top30_leads_requalified.csv` enrichis.
 
 ### 4. Restitution Client & Lead Intelligence Room
@@ -71,16 +76,17 @@ python3 build_notion_markdown.py
 - **Rôle** : Génère la synthèse markdown consolidée avec tableau hiérarchisé par statut, fiches détaillées du Top 5 vérifié et templates de messages d'approche personnalisés (sans hallucination de prénom).
 - **Sortie** : `data/lead_intelligence_room.md`.
 
-### 5. Contrôle Qualité Automatisé (QA 23 Points & 20 Tests Négatifs)
+### 5. Contrôle Qualité Automatisé (QA 24 Points & 21 Tests Négatifs)
 ```bash
 python3 qa_check.py
 ```
-- **Rôle** : Exécute automatiquement la vérification des 23 points de contrôle de vérité métier du protocole qualité (`docs/QA_PROTOCOL.md`) ainsi qu'une suite de 20 tests négatifs sur fixtures délibérément corrompues.
+- **Rôle** : Exécute automatiquement la vérification des 24 points de contrôle de vérité métier du protocole qualité (`docs/QA_PROTOCOL.md`) ainsi qu'une suite de 21 tests négatifs sur fixtures délibérément corrompues.
 - **Points Clés** :
   - Hard gates pour le statut `VERIFIED` (`MATCH_CONFIRMED`, ICP strict 2-20, dirigeant officiel, HTTPS).
   - Plafond strict de confiance (max 60 si non-VERIFIED, max 40 si matching incertain).
   - Neutralisation du score Ghostwriting (0/100) en l'absence d'audit LinkedIn vérifié.
   - Zéro affirmation non prouvée dans l'outreach et aucun faux signal dérivé des avis Google.
+  - Étanchéité absolue Niveau 4 vs Niveaux 1/2 : aucune donnée issue du staging MCP ne peut altérer l'identité du dirigeant ou la taille d'entreprise.
 
 ---
 

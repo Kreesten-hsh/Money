@@ -61,7 +61,17 @@
       "Confidence (0/100) : Structure disqualifiée (Preuve effectif: Tranche 22; Matching: MATCH_UNCERTAIN)"
     ],
     "last_checked": "2026-09-27T11:38:22Z",
-    "notes": "Matching SIRENE : MATCH_UNCERTAIN (Ambiguïté entre plusieurs sociétés candidates dans la même zone (delta 15 < 20)) | SIREN : 440941888 | Tranche : 100 à 199 salariés"
+    "notes": "Matching SIRENE : MATCH_UNCERTAIN (Ambiguïté entre plusieurs sociétés candidates dans la même zone (delta 15 < 20)) | SIREN : 440941888 | Tranche : 100 à 199 salariés",
+    "email_source": "",
+    "email_evidence": "",
+    "email_checked_at": "2026-09-27T15:21:37Z",
+    "cms_detected": "Inconnu",
+    "cms_source": "",
+    "cms_evidence": "",
+    "cms_checked_at": "2026-09-27T15:21:37Z",
+    "decision_maker_linkedin_activity": false,
+    "decision_maker_linkedin_source": "",
+    "decision_maker_linkedin_checked_at": ""
   },
   {
     "company_name": "Linkeo",
@@ -124,7 +134,17 @@
       "Confidence (20/100) : Légal 0/35 (NO_MATCH), Effectif 5/30 (None), Site 0/20 (URL non HTTPS ou manquante), Canal 15/15 (+33 9 74 56 69 69)"
     ],
     "last_checked": "2026-09-27T11:38:24Z",
-    "notes": "Matching SIRENE : NO_MATCH (Aucune concordance territoriale ou entreprise inactive (CP attendu 69002)) | SIREN : Non trouvé | Tranche : Non identifié | site inaccessible"
+    "notes": "Matching SIRENE : NO_MATCH (Aucune concordance territoriale ou entreprise inactive (CP attendu 69002)) | SIREN : Non trouvé | Tranche : Non identifié | site inaccessible",
+    "email_source": "",
+    "email_evidence": "",
+    "email_checked_at": "2026-09-27T15:21:37Z",
+    "cms_detected": "Inconnu",
+    "cms_source": "",
+    "cms_evidence": "",
+    "cms_checked_at": "2026-09-27T15:21:37Z",
+    "decision_maker_linkedin_activity": false,
+    "decision_maker_linkedin_source": "",
+    "decision_maker_linkedin_checked_at": ""
   },
   {
     "company_name": "HORIZON (HORIZON)",
@@ -186,7 +206,17 @@
       "Confidence (0/100) : Structure disqualifiée (Preuve effectif: Tranche 12; Matching: MATCH_CONFIRMED)"
     ],
     "last_checked": "2026-09-27T11:38:25Z",
-    "notes": "Matching SIRENE : MATCH_CONFIRMED (Concordance robuste confirmée sans ambiguïté concurrentielle (score 100/100, delta 30)) | SIREN : 788502466 | Tranche : 20 à 49 salariés"
+    "notes": "Matching SIRENE : MATCH_CONFIRMED (Concordance robuste confirmée sans ambiguïté concurrentielle (score 100/100, delta 30)) | SIREN : 788502466 | Tranche : 20 à 49 salariés",
+    "email_source": "",
+    "email_evidence": "",
+    "email_checked_at": "2026-09-27T15:21:37Z",
+    "cms_detected": "Inconnu",
+    "cms_source": "",
+    "cms_evidence": "",
+    "cms_checked_at": "2026-09-27T15:21:37Z",
+    "decision_maker_linkedin_activity": false,
+    "decision_maker_linkedin_source": "",
+    "decision_maker_linkedin_checked_at": ""
   },
   {
     "company_name": "AKISIWEB",
@@ -248,7 +278,17 @@
       "Confidence (100/100) : Légal 35/35 (MATCH_CONFIRMED), Effectif 30/30 (03), Site 20/20 (Site accessible (Akisiweb: Agence web à Brie-Comte-Robert)), Canal 15/15 (+33 1 84 80 99 98)"
     ],
     "last_checked": "2026-09-27T11:38:28Z",
-    "notes": "Matching SIRENE : MATCH_CONFIRMED (Concordance robuste confirmée sans ambiguïté concurrentielle (score 100/100, delta 100)) | SIREN : 492119599 | Tranche : 6 à 9 salariés"
+    "notes": "Matching SIRENE : MATCH_CONFIRMED (Concordance robuste confirmée sans ambiguïté concurrentielle (score 100/100, delta 100)) | SIREN : 492119599 | Tranche : 6 à 9 salariés",
+    "email_source": "",
+    "email_evidence": "",
+    "email_checked_at": "2026-09-27T15:21:37Z",
+    "cms_detected": "Inconnu",
+    "cms_source": "",
+    "cms_evidence": "",
+    "cms_checked_at": "2026-09-27T15:21:37Z",
+    "decision_maker_linkedin_activity": false,
+    "decision_maker_linkedin_source": "",
+    "decision_maker_linkedin_checked_at": ""
   },
   {
     "company_name": "VISTALID (VISTALID)",
@@ -310,7 +350,17 @@
       "Confidence (0/100) : Structure disqualifiée (Preuve effectif: Tranche 22; Matching: MATCH_CONFIRMED)"
     ],
     "last_checked": "2026-09-27T11:38:30Z",
-    "notes": "Matching SIRENE : MATCH_CONFIRMED (Concordance robuste confirmée sans ambiguïté concurrentielle (score 100/100, delta 100)) | SIREN : 792365421 | Tranche : 100 à 199 salariés"
+    "notes": "Matching SIRENE : MATCH_CONFIRMED (Concordance robuste confirmée sans ambiguïté concurrentielle (score 100/100, delta 100)) | SIREN : 792365421 | Tranche : 100 à 199 salariés",
+    "email_source": "",
+    "email_evidence": "",
+    "email_checked_at": "2026-09-27T15:21:37Z",
+    "cms_detected": "Inconnu",
+    "cms_source": "",
+    "cms_evidence": "",
+    "cms_checked_at": "2026-09-27T15:21:37Z",
+    "decision_maker_linkedin_activity": false,
+    "decision_maker_linkedin_source": "",
+    "decision_maker_linkedin_checked_at": ""
   },
   {
     "company_name": "LYONNAI'S INVEST (GENTLEVIEW)",
@@ -372,7 +422,17 @@
       "Confidence (0/100) : Structure disqualifiée (Preuve effectif: Tranche NN; Matching: MATCH_CONFIRMED)"
     ],
     "last_checked": "2026-09-27T11:38:33Z",
-    "notes": "Matching SIRENE : MATCH_CONFIRMED (Concordance robuste confirmée sans ambiguïté concurrentielle (score 100/100, delta 100)) | SIREN : 807522719 | Tranche : 0 salarié déclaré (Non employeur)"
+    "notes": "Matching SIRENE : MATCH_CONFIRMED (Concordance robuste confirmée sans ambiguïté concurrentielle (score 100/100, delta 100)) | SIREN : 807522719 | Tranche : 0 salarié déclaré (Non employeur)",
+    "email_source": "",
+    "email_evidence": "",
+    "email_checked_at": "2026-09-27T15:21:37Z",
+    "cms_detected": "Inconnu",
+    "cms_source": "",
+    "cms_evidence": "",
+    "cms_checked_at": "2026-09-27T15:21:37Z",
+    "decision_maker_linkedin_activity": false,
+    "decision_maker_linkedin_source": "",
+    "decision_maker_linkedin_checked_at": ""
   },
   {
     "company_name": "PILOT'IN (PILOT'IN)",
@@ -434,7 +494,17 @@
       "Confidence (100/100) : Légal 35/35 (MATCH_CONFIRMED), Effectif 30/30 (11), Site 20/20 (Site accessible (Pilot&#039;in - Agence digitale et créat)), Canal 15/15 (+33 4 82 53 74 30)"
     ],
     "last_checked": "2026-09-27T11:38:37Z",
-    "notes": "Matching SIRENE : MATCH_CONFIRMED (Concordance robuste confirmée sans ambiguïté concurrentielle (score 100/100, delta 100)) | SIREN : 794214619 | Tranche : 10 à 19 salariés"
+    "notes": "Matching SIRENE : MATCH_CONFIRMED (Concordance robuste confirmée sans ambiguïté concurrentielle (score 100/100, delta 100)) | SIREN : 794214619 | Tranche : 10 à 19 salariés",
+    "email_source": "",
+    "email_evidence": "",
+    "email_checked_at": "2026-09-27T15:21:37Z",
+    "cms_detected": "Inconnu",
+    "cms_source": "",
+    "cms_evidence": "",
+    "cms_checked_at": "2026-09-27T15:21:37Z",
+    "decision_maker_linkedin_activity": false,
+    "decision_maker_linkedin_source": "",
+    "decision_maker_linkedin_checked_at": ""
   },
   {
     "company_name": "ARTHUR LONGERON (WEBDEVO)",
@@ -496,7 +566,17 @@
       "Confidence (0/100) : Structure disqualifiée (Preuve effectif: Tranche NN; Matching: MATCH_CONFIRMED)"
     ],
     "last_checked": "2026-09-27T11:38:40Z",
-    "notes": "Matching SIRENE : MATCH_CONFIRMED (Concordance robuste confirmée sans ambiguïté concurrentielle (score 100/100, delta 100)) | SIREN : 901389767 | Tranche : 0 salarié déclaré (Non employeur) | site inaccessible"
+    "notes": "Matching SIRENE : MATCH_CONFIRMED (Concordance robuste confirmée sans ambiguïté concurrentielle (score 100/100, delta 100)) | SIREN : 901389767 | Tranche : 0 salarié déclaré (Non employeur) | site inaccessible",
+    "email_source": "",
+    "email_evidence": "",
+    "email_checked_at": "2026-09-27T15:21:37Z",
+    "cms_detected": "Inconnu",
+    "cms_source": "",
+    "cms_evidence": "",
+    "cms_checked_at": "2026-09-27T15:21:37Z",
+    "decision_maker_linkedin_activity": false,
+    "decision_maker_linkedin_source": "",
+    "decision_maker_linkedin_checked_at": ""
   },
   {
     "company_name": "M COM",
@@ -559,7 +639,17 @@
       "Confidence (40/100) : Légal 0/35 (NO_MATCH), Effectif 5/30 (None), Site 20/20 (Site accessible (M Com | L&#039;agence web qui booste vot)), Canal 15/15 (+33 4 91 51 56 37)"
     ],
     "last_checked": "2026-09-27T11:38:41Z",
-    "notes": "Matching SIRENE : NO_MATCH (Aucune concordance territoriale ou entreprise inactive (CP attendu 13012)) | SIREN : Non trouvé | Tranche : Non identifié"
+    "notes": "Matching SIRENE : NO_MATCH (Aucune concordance territoriale ou entreprise inactive (CP attendu 13012)) | SIREN : Non trouvé | Tranche : Non identifié",
+    "email_source": "",
+    "email_evidence": "",
+    "email_checked_at": "2026-09-27T15:21:37Z",
+    "cms_detected": "Inconnu",
+    "cms_source": "",
+    "cms_evidence": "",
+    "cms_checked_at": "2026-09-27T15:21:37Z",
+    "decision_maker_linkedin_activity": false,
+    "decision_maker_linkedin_source": "",
+    "decision_maker_linkedin_checked_at": ""
   },
   {
     "company_name": "Starboost",
@@ -622,7 +712,17 @@
       "Confidence (40/100) : Légal 0/35 (NO_MATCH), Effectif 5/30 (None), Site 20/20 (Site accessible (Agence SEO local &amp; Google Ads à Pari)), Canal 15/15 (+33 7 56 86 72 96)"
     ],
     "last_checked": "2026-09-27T11:38:50Z",
-    "notes": "Matching SIRENE : NO_MATCH (Aucune concordance territoriale ou entreprise inactive (CP attendu 75008)) | SIREN : Non trouvé | Tranche : Non identifié"
+    "notes": "Matching SIRENE : NO_MATCH (Aucune concordance territoriale ou entreprise inactive (CP attendu 75008)) | SIREN : Non trouvé | Tranche : Non identifié",
+    "email_source": "",
+    "email_evidence": "",
+    "email_checked_at": "2026-09-27T15:21:37Z",
+    "cms_detected": "Inconnu",
+    "cms_source": "",
+    "cms_evidence": "",
+    "cms_checked_at": "2026-09-27T15:21:37Z",
+    "decision_maker_linkedin_activity": false,
+    "decision_maker_linkedin_source": "",
+    "decision_maker_linkedin_checked_at": ""
   },
   {
     "company_name": "Linkeo",
@@ -685,7 +785,17 @@
       "Confidence (20/100) : Légal 0/35 (NO_MATCH), Effectif 5/30 (None), Site 0/20 (URL non HTTPS ou manquante), Canal 15/15 (+33 9 74 56 34 34)"
     ],
     "last_checked": "2026-09-27T11:38:53Z",
-    "notes": "Matching SIRENE : NO_MATCH (Aucune concordance territoriale ou entreprise inactive (CP attendu 34000)) | SIREN : Non trouvé | Tranche : Non identifié | site inaccessible"
+    "notes": "Matching SIRENE : NO_MATCH (Aucune concordance territoriale ou entreprise inactive (CP attendu 34000)) | SIREN : Non trouvé | Tranche : Non identifié | site inaccessible",
+    "email_source": "",
+    "email_evidence": "",
+    "email_checked_at": "2026-09-27T15:21:37Z",
+    "cms_detected": "Inconnu",
+    "cms_source": "",
+    "cms_evidence": "",
+    "cms_checked_at": "2026-09-27T15:21:37Z",
+    "decision_maker_linkedin_activity": false,
+    "decision_maker_linkedin_source": "",
+    "decision_maker_linkedin_checked_at": ""
   },
   {
     "company_name": "AGENCE THRIVE",
@@ -748,7 +858,17 @@
       "Confidence (60/100) : Légal 20/35 (MATCH_PLAUSIBLE), Effectif 30/30 (11), Site 20/20 (Site accessible (Agence THRIVE - Agence web &amp; marketi)), Canal 15/15 (+33 5 57 30 72 86)"
     ],
     "last_checked": "2026-09-27T11:38:56Z",
-    "notes": "Matching SIRENE : MATCH_PLAUSIBLE (Éléments plausibles mais confirmation incomplète (score 85/100)) | SIREN : 835080409 | Tranche : 10 à 19 salariés"
+    "notes": "Matching SIRENE : MATCH_PLAUSIBLE (Éléments plausibles mais confirmation incomplète (score 85/100)) | SIREN : 835080409 | Tranche : 10 à 19 salariés",
+    "email_source": "",
+    "email_evidence": "",
+    "email_checked_at": "2026-09-27T15:21:37Z",
+    "cms_detected": "Inconnu",
+    "cms_source": "",
+    "cms_evidence": "",
+    "cms_checked_at": "2026-09-27T15:21:37Z",
+    "decision_maker_linkedin_activity": false,
+    "decision_maker_linkedin_source": "",
+    "decision_maker_linkedin_checked_at": ""
   },
   {
     "company_name": "Agence Info Conception - SEO Nantes",
@@ -807,7 +927,17 @@
       "Confidence (40/100) : Légal 0/35 (NO_MATCH), Effectif 5/30 (None), Site 20/20 (Site accessible (Agence SEO Nantes | Info Conception - Ré)), Canal 15/15 (+33 2 51 47 39 90)"
     ],
     "last_checked": "2026-09-27T11:39:02Z",
-    "notes": "Matching SIRENE : NO_MATCH (Aucune entreprise trouvée pour cette recherche) | SIREN : Non trouvé | Tranche : Non identifié"
+    "notes": "Matching SIRENE : NO_MATCH (Aucune entreprise trouvée pour cette recherche) | SIREN : Non trouvé | Tranche : Non identifié",
+    "email_source": "",
+    "email_evidence": "",
+    "email_checked_at": "2026-09-27T15:21:37Z",
+    "cms_detected": "Inconnu",
+    "cms_source": "",
+    "cms_evidence": "",
+    "cms_checked_at": "2026-09-27T15:21:37Z",
+    "decision_maker_linkedin_activity": false,
+    "decision_maker_linkedin_source": "",
+    "decision_maker_linkedin_checked_at": ""
   },
   {
     "company_name": "eMaginance",
@@ -866,7 +996,17 @@
       "Confidence (40/100) : Légal 0/35 (NO_MATCH), Effectif 5/30 (None), Site 20/20 (Site accessible (Création site internet et e-commerce à N)), Canal 15/15 (+33 7 82 90 76 35)"
     ],
     "last_checked": "2026-09-27T11:39:05Z",
-    "notes": "Matching SIRENE : NO_MATCH (Aucune entreprise trouvée pour cette recherche) | SIREN : Non trouvé | Tranche : Non identifié"
+    "notes": "Matching SIRENE : NO_MATCH (Aucune entreprise trouvée pour cette recherche) | SIREN : Non trouvé | Tranche : Non identifié",
+    "email_source": "",
+    "email_evidence": "",
+    "email_checked_at": "2026-09-27T15:21:37Z",
+    "cms_detected": "Inconnu",
+    "cms_source": "",
+    "cms_evidence": "",
+    "cms_checked_at": "2026-09-27T15:21:37Z",
+    "decision_maker_linkedin_activity": false,
+    "decision_maker_linkedin_source": "",
+    "decision_maker_linkedin_checked_at": ""
   },
   {
     "company_name": "AUBERT-DUMOND (ETHIKO)",
@@ -930,7 +1070,17 @@
       "Confidence (0/100) : Structure disqualifiée (Preuve effectif: Tranche 00; Matching: MATCH_UNCERTAIN)"
     ],
     "last_checked": "2026-09-27T11:39:13Z",
-    "notes": "Matching SIRENE : MATCH_UNCERTAIN (Ambiguïté entre plusieurs sociétés candidates dans la même zone (delta 15 < 20)) | SIREN : 841563711 | Tranche : 0 salarié au 31/12"
+    "notes": "Matching SIRENE : MATCH_UNCERTAIN (Ambiguïté entre plusieurs sociétés candidates dans la même zone (delta 15 < 20)) | SIREN : 841563711 | Tranche : 0 salarié au 31/12",
+    "email_source": "",
+    "email_evidence": "",
+    "email_checked_at": "2026-09-27T15:21:37Z",
+    "cms_detected": "Inconnu",
+    "cms_source": "",
+    "cms_evidence": "",
+    "cms_checked_at": "2026-09-27T15:21:37Z",
+    "decision_maker_linkedin_activity": false,
+    "decision_maker_linkedin_source": "",
+    "decision_maker_linkedin_checked_at": ""
   },
   {
     "company_name": "ImagesCréations",
@@ -989,7 +1139,17 @@
       "Confidence (40/100) : Légal 0/35 (NO_MATCH), Effectif 5/30 (None), Site 20/20 (Site accessible (Agence Web Nantes : Création de sites in)), Canal 15/15 (+33 2 40 50 77 66)"
     ],
     "last_checked": "2026-09-27T11:39:16Z",
-    "notes": "Matching SIRENE : NO_MATCH (Aucune entreprise trouvée pour cette recherche) | SIREN : Non trouvé | Tranche : Non identifié"
+    "notes": "Matching SIRENE : NO_MATCH (Aucune entreprise trouvée pour cette recherche) | SIREN : Non trouvé | Tranche : Non identifié",
+    "email_source": "",
+    "email_evidence": "",
+    "email_checked_at": "2026-09-27T15:21:37Z",
+    "cms_detected": "Inconnu",
+    "cms_source": "",
+    "cms_evidence": "",
+    "cms_checked_at": "2026-09-27T15:21:37Z",
+    "decision_maker_linkedin_activity": false,
+    "decision_maker_linkedin_source": "",
+    "decision_maker_linkedin_checked_at": ""
   },
   {
     "company_name": "KEOLE & GAZOLINE",
@@ -1051,7 +1211,17 @@
       "Confidence (100/100) : Légal 35/35 (MATCH_CONFIRMED), Effectif 30/30 (11), Site 20/20 (Site accessible (Agence communication Montpellier : Trans)), Canal 15/15 (+33 7 44 99 52 52)"
     ],
     "last_checked": "2026-09-27T11:39:24Z",
-    "notes": "Matching SIRENE : MATCH_CONFIRMED (Concordance robuste confirmée sans ambiguïté concurrentielle (score 100/100, delta 100)) | SIREN : 433978616 | Tranche : 10 à 19 salariés"
+    "notes": "Matching SIRENE : MATCH_CONFIRMED (Concordance robuste confirmée sans ambiguïté concurrentielle (score 100/100, delta 100)) | SIREN : 433978616 | Tranche : 10 à 19 salariés",
+    "email_source": "",
+    "email_evidence": "",
+    "email_checked_at": "2026-09-27T15:21:37Z",
+    "cms_detected": "Inconnu",
+    "cms_source": "",
+    "cms_evidence": "",
+    "cms_checked_at": "2026-09-27T15:21:37Z",
+    "decision_maker_linkedin_activity": false,
+    "decision_maker_linkedin_source": "",
+    "decision_maker_linkedin_checked_at": ""
   },
   {
     "company_name": "Aixpressweb - Création de site internet Marseille",
@@ -1110,7 +1280,17 @@
       "Confidence (40/100) : Légal 0/35 (NO_MATCH), Effectif 5/30 (None), Site 20/20 (Site accessible (Création de sites internet Marseille💻 - )), Canal 15/15 (+33 7 66 34 05 85)"
     ],
     "last_checked": "2026-09-27T11:39:27Z",
-    "notes": "Matching SIRENE : NO_MATCH (Aucune entreprise trouvée pour cette recherche) | SIREN : Non trouvé | Tranche : Non identifié"
+    "notes": "Matching SIRENE : NO_MATCH (Aucune entreprise trouvée pour cette recherche) | SIREN : Non trouvé | Tranche : Non identifié",
+    "email_source": "",
+    "email_evidence": "",
+    "email_checked_at": "2026-09-27T15:21:37Z",
+    "cms_detected": "Inconnu",
+    "cms_source": "",
+    "cms_evidence": "",
+    "cms_checked_at": "2026-09-27T15:21:37Z",
+    "decision_maker_linkedin_activity": false,
+    "decision_maker_linkedin_source": "",
+    "decision_maker_linkedin_checked_at": ""
   },
   {
     "company_name": "4BEEZ",
@@ -1172,7 +1352,17 @@
       "Confidence (100/100) : Légal 35/35 (MATCH_CONFIRMED), Effectif 30/30 (02), Site 20/20 (Site accessible (Agence digitale Paris | Branding, créati)), Canal 15/15 (+33 1 76 54 30 97)"
     ],
     "last_checked": "2026-09-27T11:39:31Z",
-    "notes": "Matching SIRENE : MATCH_CONFIRMED (Concordance robuste confirmée sans ambiguïté concurrentielle (score 100/100, delta 100)) | SIREN : 837559301 | Tranche : 3 à 5 salariés"
+    "notes": "Matching SIRENE : MATCH_CONFIRMED (Concordance robuste confirmée sans ambiguïté concurrentielle (score 100/100, delta 100)) | SIREN : 837559301 | Tranche : 3 à 5 salariés",
+    "email_source": "",
+    "email_evidence": "",
+    "email_checked_at": "2026-09-27T15:21:37Z",
+    "cms_detected": "Inconnu",
+    "cms_source": "",
+    "cms_evidence": "",
+    "cms_checked_at": "2026-09-27T15:21:37Z",
+    "decision_maker_linkedin_activity": false,
+    "decision_maker_linkedin_source": "",
+    "decision_maker_linkedin_checked_at": ""
   },
   {
     "company_name": "Referencemoi - Agence Web Lille - Agence SEO Lillle - Ads - Intervenant Digital",
@@ -1235,7 +1425,17 @@
       "Confidence (40/100) : Légal 0/35 (NO_MATCH), Effectif 5/30 (None), Site 20/20 (Site accessible (Agence SEO Lille, agence web Lille, réfé)), Canal 15/15 (+33 3 20 73 67 17)"
     ],
     "last_checked": "2026-09-27T11:39:33Z",
-    "notes": "Matching SIRENE : NO_MATCH (Aucune concordance territoriale ou entreprise inactive (CP attendu 59800)) | SIREN : Non trouvé | Tranche : Non identifié"
+    "notes": "Matching SIRENE : NO_MATCH (Aucune concordance territoriale ou entreprise inactive (CP attendu 59800)) | SIREN : Non trouvé | Tranche : Non identifié",
+    "email_source": "",
+    "email_evidence": "",
+    "email_checked_at": "2026-09-27T15:21:37Z",
+    "cms_detected": "Inconnu",
+    "cms_source": "",
+    "cms_evidence": "",
+    "cms_checked_at": "2026-09-27T15:21:37Z",
+    "decision_maker_linkedin_activity": false,
+    "decision_maker_linkedin_source": "",
+    "decision_maker_linkedin_checked_at": ""
   },
   {
     "company_name": "JALIS Toulouse",
@@ -1294,7 +1494,17 @@
       "Confidence (40/100) : Légal 0/35 (NO_MATCH), Effectif 5/30 (None), Site 20/20 (Site accessible (Agence WEB à Toulouse | Création de Site)), Canal 15/15 (+33 5 40 25 27 61)"
     ],
     "last_checked": "2026-09-27T11:39:36Z",
-    "notes": "Matching SIRENE : NO_MATCH (Aucune entreprise trouvée pour cette recherche) | SIREN : Non trouvé | Tranche : Non identifié"
+    "notes": "Matching SIRENE : NO_MATCH (Aucune entreprise trouvée pour cette recherche) | SIREN : Non trouvé | Tranche : Non identifié",
+    "email_source": "",
+    "email_evidence": "",
+    "email_checked_at": "2026-09-27T15:21:37Z",
+    "cms_detected": "Inconnu",
+    "cms_source": "",
+    "cms_evidence": "",
+    "cms_checked_at": "2026-09-27T15:21:37Z",
+    "decision_maker_linkedin_activity": false,
+    "decision_maker_linkedin_source": "",
+    "decision_maker_linkedin_checked_at": ""
   },
   {
     "company_name": "NRV",
@@ -1357,7 +1567,17 @@
       "Confidence (20/100) : Légal 0/35 (NO_MATCH), Effectif 5/30 (None), Site 0/20 (URL non HTTPS ou manquante), Canal 15/15 (+33 5 82 95 98 11)"
     ],
     "last_checked": "2026-09-27T11:39:39Z",
-    "notes": "Matching SIRENE : NO_MATCH (Aucune concordance territoriale ou entreprise inactive (CP attendu 31500)) | SIREN : Non trouvé | Tranche : Non identifié | site inaccessible"
+    "notes": "Matching SIRENE : NO_MATCH (Aucune concordance territoriale ou entreprise inactive (CP attendu 31500)) | SIREN : Non trouvé | Tranche : Non identifié | site inaccessible",
+    "email_source": "",
+    "email_evidence": "",
+    "email_checked_at": "2026-09-27T15:21:37Z",
+    "cms_detected": "Inconnu",
+    "cms_source": "",
+    "cms_evidence": "",
+    "cms_checked_at": "2026-09-27T15:21:37Z",
+    "decision_maker_linkedin_activity": false,
+    "decision_maker_linkedin_source": "",
+    "decision_maker_linkedin_checked_at": ""
   },
   {
     "company_name": "Weby Lab",
@@ -1420,7 +1640,17 @@
       "Confidence (20/100) : Légal 0/35 (NO_MATCH), Effectif 5/30 (None), Site 0/20 (URL non HTTPS ou manquante), Canal 15/15 (+33 9 82 43 29 01)"
     ],
     "last_checked": "2026-09-27T11:39:40Z",
-    "notes": "Matching SIRENE : NO_MATCH (Aucune concordance territoriale ou entreprise inactive (CP attendu 69006)) | SIREN : Non trouvé | Tranche : Non identifié | site inaccessible"
+    "notes": "Matching SIRENE : NO_MATCH (Aucune concordance territoriale ou entreprise inactive (CP attendu 69006)) | SIREN : Non trouvé | Tranche : Non identifié | site inaccessible",
+    "email_source": "",
+    "email_evidence": "",
+    "email_checked_at": "2026-09-27T15:21:37Z",
+    "cms_detected": "Inconnu",
+    "cms_source": "",
+    "cms_evidence": "",
+    "cms_checked_at": "2026-09-27T15:21:37Z",
+    "decision_maker_linkedin_activity": false,
+    "decision_maker_linkedin_source": "",
+    "decision_maker_linkedin_checked_at": ""
   },
   {
     "company_name": "EVOLYON (EVOLYON)",
@@ -1482,7 +1712,17 @@
       "Confidence (95/100) : Légal 35/35 (MATCH_CONFIRMED), Effectif 25/30 (01), Site 20/20 (Site accessible (Agence web Lyon | Evolyon)), Canal 15/15 (+33 4 37 57 38 97)"
     ],
     "last_checked": "2026-09-27T11:39:42Z",
-    "notes": "Matching SIRENE : MATCH_CONFIRMED (Concordance robuste confirmée sans ambiguïté concurrentielle (score 100/100, delta 100)) | SIREN : 823956289 | Tranche : 1 ou 2 salariés"
+    "notes": "Matching SIRENE : MATCH_CONFIRMED (Concordance robuste confirmée sans ambiguïté concurrentielle (score 100/100, delta 100)) | SIREN : 823956289 | Tranche : 1 ou 2 salariés",
+    "email_source": "",
+    "email_evidence": "",
+    "email_checked_at": "2026-09-27T15:21:37Z",
+    "cms_detected": "Inconnu",
+    "cms_source": "",
+    "cms_evidence": "",
+    "cms_checked_at": "2026-09-27T15:21:37Z",
+    "decision_maker_linkedin_activity": false,
+    "decision_maker_linkedin_source": "",
+    "decision_maker_linkedin_checked_at": ""
   },
   {
     "company_name": "Rankit - Agence SEO Lyon",
@@ -1545,7 +1785,17 @@
       "Confidence (40/100) : Légal 0/35 (NO_MATCH), Effectif 5/30 (None), Site 20/20 (Site accessible (Agence SEO Lyon ★ 4,9/5 sur 110+ avis Go)), Canal 15/15 (+33 7 63 44 46 07)"
     ],
     "last_checked": "2026-09-27T11:39:45Z",
-    "notes": "Matching SIRENE : NO_MATCH (Aucune concordance territoriale ou entreprise inactive (CP attendu 69001)) | SIREN : Non trouvé | Tranche : Non identifié"
+    "notes": "Matching SIRENE : NO_MATCH (Aucune concordance territoriale ou entreprise inactive (CP attendu 69001)) | SIREN : Non trouvé | Tranche : Non identifié",
+    "email_source": "",
+    "email_evidence": "",
+    "email_checked_at": "2026-09-27T15:21:37Z",
+    "cms_detected": "Inconnu",
+    "cms_source": "",
+    "cms_evidence": "",
+    "cms_checked_at": "2026-09-27T15:21:37Z",
+    "decision_maker_linkedin_activity": false,
+    "decision_maker_linkedin_source": "",
+    "decision_maker_linkedin_checked_at": ""
   },
   {
     "company_name": "Webmaster freelance Paris - DIGIWEBLINE",
@@ -1604,7 +1854,17 @@
       "Confidence (40/100) : Légal 0/35 (NO_MATCH), Effectif 5/30 (None), Site 20/20 (Site accessible (Webmaster freelance Paris – Création &am)), Canal 15/15 (+33 6 68 02 83 99)"
     ],
     "last_checked": "2026-09-27T11:39:48Z",
-    "notes": "Matching SIRENE : NO_MATCH (Aucune entreprise trouvée pour cette recherche) | SIREN : Non trouvé | Tranche : Non identifié"
+    "notes": "Matching SIRENE : NO_MATCH (Aucune entreprise trouvée pour cette recherche) | SIREN : Non trouvé | Tranche : Non identifié",
+    "email_source": "",
+    "email_evidence": "",
+    "email_checked_at": "2026-09-27T15:21:37Z",
+    "cms_detected": "Inconnu",
+    "cms_source": "",
+    "cms_evidence": "",
+    "cms_checked_at": "2026-09-27T15:21:37Z",
+    "decision_maker_linkedin_activity": false,
+    "decision_maker_linkedin_source": "",
+    "decision_maker_linkedin_checked_at": ""
   },
   {
     "company_name": "CEDRIC CHEVILLARD",
@@ -1666,7 +1926,17 @@
       "Confidence (0/100) : Structure disqualifiée (Preuve effectif: Tranche NN; Matching: MATCH_CONFIRMED)"
     ],
     "last_checked": "2026-09-27T11:39:51Z",
-    "notes": "Matching SIRENE : MATCH_CONFIRMED (Concordance robuste confirmée sans ambiguïté concurrentielle (score 100/100, delta 100)) | SIREN : 830623138 | Tranche : 0 salarié déclaré (Non employeur)"
+    "notes": "Matching SIRENE : MATCH_CONFIRMED (Concordance robuste confirmée sans ambiguïté concurrentielle (score 100/100, delta 100)) | SIREN : 830623138 | Tranche : 0 salarié déclaré (Non employeur)",
+    "email_source": "",
+    "email_evidence": "",
+    "email_checked_at": "2026-09-27T15:21:37Z",
+    "cms_detected": "Inconnu",
+    "cms_source": "",
+    "cms_evidence": "",
+    "cms_checked_at": "2026-09-27T15:21:37Z",
+    "decision_maker_linkedin_activity": false,
+    "decision_maker_linkedin_source": "",
+    "decision_maker_linkedin_checked_at": ""
   },
   {
     "company_name": "Promoovoir | Agence SEO & GEO Paris",
@@ -1725,7 +1995,17 @@
       "Confidence (5/100) : Légal 0/35 (NO_MATCH), Effectif 5/30 (None), Site 0/20 (URL non HTTPS ou manquante), Canal 0/15 ()"
     ],
     "last_checked": "2026-09-27T11:39:54Z",
-    "notes": "Matching SIRENE : NO_MATCH (Aucune entreprise trouvée pour cette recherche) | SIREN : Non trouvé | Tranche : Non identifié | site inaccessible"
+    "notes": "Matching SIRENE : NO_MATCH (Aucune entreprise trouvée pour cette recherche) | SIREN : Non trouvé | Tranche : Non identifié | site inaccessible",
+    "email_source": "",
+    "email_evidence": "",
+    "email_checked_at": "2026-09-27T15:21:37Z",
+    "cms_detected": "Inconnu",
+    "cms_source": "",
+    "cms_evidence": "",
+    "cms_checked_at": "2026-09-27T15:21:37Z",
+    "decision_maker_linkedin_activity": false,
+    "decision_maker_linkedin_source": "",
+    "decision_maker_linkedin_checked_at": ""
   },
   {
     "company_name": "SIMPLEMENT",
@@ -1787,7 +2067,17 @@
       "Confidence (95/100) : Légal 35/35 (MATCH_CONFIRMED), Effectif 25/30 (01), Site 20/20 (Site accessible (Agence Web Marseille – Sites pensés pour)), Canal 15/15 (+33 7 61 94 15 67)"
     ],
     "last_checked": "2026-09-27T11:39:55Z",
-    "notes": "Matching SIRENE : MATCH_CONFIRMED (Concordance robuste confirmée sans ambiguïté concurrentielle (score 100/100, delta 60)) | SIREN : 881530265 | Tranche : 1 ou 2 salariés"
+    "notes": "Matching SIRENE : MATCH_CONFIRMED (Concordance robuste confirmée sans ambiguïté concurrentielle (score 100/100, delta 60)) | SIREN : 881530265 | Tranche : 1 ou 2 salariés",
+    "email_source": "",
+    "email_evidence": "",
+    "email_checked_at": "2026-09-27T15:21:37Z",
+    "cms_detected": "Inconnu",
+    "cms_source": "",
+    "cms_evidence": "",
+    "cms_checked_at": "2026-09-27T15:21:37Z",
+    "decision_maker_linkedin_activity": false,
+    "decision_maker_linkedin_source": "",
+    "decision_maker_linkedin_checked_at": ""
   },
   {
     "company_name": "YOHANN DEPREZ (YOHANN DEPREZ)",
@@ -1849,6 +2139,16 @@
       "Confidence (0/100) : Structure disqualifiée (Preuve effectif: Tranche NN; Matching: MATCH_CONFIRMED)"
     ],
     "last_checked": "2026-09-27T11:39:59Z",
-    "notes": "Matching SIRENE : MATCH_CONFIRMED (Concordance robuste confirmée sans ambiguïté concurrentielle (score 100/100, delta 100)) | SIREN : 902407170 | Tranche : 0 salarié déclaré (Non employeur)"
+    "notes": "Matching SIRENE : MATCH_CONFIRMED (Concordance robuste confirmée sans ambiguïté concurrentielle (score 100/100, delta 100)) | SIREN : 902407170 | Tranche : 0 salarié déclaré (Non employeur)",
+    "email_source": "",
+    "email_evidence": "",
+    "email_checked_at": "2026-09-27T15:21:37Z",
+    "cms_detected": "Inconnu",
+    "cms_source": "",
+    "cms_evidence": "",
+    "cms_checked_at": "2026-09-27T15:21:37Z",
+    "decision_maker_linkedin_activity": false,
+    "decision_maker_linkedin_source": "",
+    "decision_maker_linkedin_checked_at": ""
   }
 ]

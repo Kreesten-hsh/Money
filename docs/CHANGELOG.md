@@ -2,6 +2,33 @@
 
 Toutes les évolutions significatives du code, de la documentation et des données sont consignées ici.
 
+## [2026-09-27] — Automatisation theHarvester, Runbook Opérateur MCP & QA 24 Points (Branche feat/mcp-runbook-and-harvest-automation)
+### Ajouté
+- **[Écart 1 — Runbook Opérateur MCP & Contrat de Staging]** :
+  - Création de `docs/OPERATOR_RUNBOOK_MCP.md` définissant le cadre opérationnel pour l'agent IA exploitant `invisible_playwright_mcp` selon 2 déclencheurs exclusifs :
+    - *Repli Annuaires / Mentions Légales* : sollicitation ciblée en lecture seule lors d'échecs HTTP/Cloudflare (403, challenge) pour extraire l'offre principale et la page équipe, sans jamais déduire l'identité du dirigeant ou l'effectif.
+    - *Consultation LinkedIn (ADR-008)* : vérification unitaire passive de l'activité éditoriale publique récente (≤ 5 profils/jour, sans compte connecté, zéro extraction de réseau) uniquement pour les dirigeants au statut `MATCH_CONFIRMED` au registre SIRENE.
+  - Définition du contrat JSON `data/mcp_audit_staging.json` (`schema_version`, `generated_by`, `entries[]` avec `field_target`, `extracted_value`, `source_url`, `evidence_text`, `collected_at`).
+  - Règle d'or absolue formalisée : interdiction d'écrire dans ce staging tout champ alimentant `decision_maker*` ou `company_size*` (réservés au Niveau 1/2 légal).
+- **[Écart 2 — Automatisation theHarvester CLI]** :
+  - Création de l'orchestrateur `harvest_osint.py` (pur stdlib Python, exécution par `subprocess`, zéro dépendance externe).
+  - Lecture dynamique des sources actives depuis `config/theHarvester.yaml` (aucun hardcoding de la liste).
+  - Support du batching (`--offset`, `--limit`) et validation formelle de l'existence du binaire dans le PATH (échec explicite avec code 1 et message d'erreur clair si introuvable, aucun staging vide factice généré).
+  - Normalisation et écriture directe dans `data/osint_emails_staging.json`.
+- **[Écart 3 — Résilience MX via DNS-over-HTTPS (DoH)]** :
+  - Intégration d'un 3ème palier de résolution MX dans `resolve_mx_records()` (`enrich_leads_osint.py`) via l'API publique `https://dns.google/resolve?name=<domain>&type=MX` (pur `urllib.request`).
+  - Justification documentée dans `docs/TOOLING.md` ("stdlib insuffisant sur réseaux filtrant UDP:53").
+- **[Ingestion MCP & Schéma]** :
+  - Extension d'enrichissement déterministe dans `enrich_leads_osint.py` via `ingest_mcp_staging()` : alimentation de `main_offer` (si manquant) et des 3 nouveaux champs informatifs LinkedIn (`decision_maker_linkedin_activity`, `decision_maker_linkedin_source`, `decision_maker_linkedin_checked_at`).
+  - Spécification des 3 nouveaux champs dans `docs/LEAD_DATA_SCHEMA.md`.
+- **[Contrôle Qualité & Test Négatif 24]** :
+  - Ajout du **Contrôle 24 (Étanchéité Staging MCP vs Registre Légal)** dans `qa_check.py` vérifiant programmatiquement l'absence totale de fuite de valeurs de staging MCP dans les champs légaux (`decision_maker`, `decision_maker_role`, `company_size`, `company_size_code`).
+  - Ajout du test négatif unitaire `MCP 1` dans `run_negative_tests()`.
+  - Passage formel du protocole QA à 24 contrôles et 21 tests négatifs (100% PASS).
+- **[Documentation]** :
+  - Mise à jour de `docs/TOOLING.md` avec `invisible_playwright_mcp` (statut USE NOW encadré ADR-008) et `harvest_osint.py`.
+  - Mise à jour de `docs/QA_PROTOCOL.md` et `README.md`.
+
 ## [2026-09-27] — Intégration OSINT Déterministe, Cadre LinkedIn & QA 23 Points (Branche feat/lead-osint-enrichment)
 ### Ajouté
 - **[Pipeline] Module déterministe `enrich_leads_osint.py`** : Étape 4 insérée dans le pipeline. Valide les emails candidats par résolution MX native RFC 1035 en pur Python stdlib (socket/UDP direct sans `dnspython`), impose la concordance stricte de domaine avec le site audité en Niveau 1, et détecte de façon observable l'empreinte CMS via signatures HTML et en-têtes HTTP.
