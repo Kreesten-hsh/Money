@@ -12,19 +12,35 @@ from money_v2.providers.base import BaseProvider
 class InvisiblePlaywrightProvider(BaseProvider):
     """
     Provider Navigateur Furtif (invisible_playwright_mcp / patchright).
-    Niveau 3 de la chaîne de repli pour les sites sous protection WAF / Cloudflare
-    et pour les consultations LinkedIn unitaire ultra-encadrées (ADR-008).
-
-    Règles absolues d'étanchéité :
-    - N'écrit JAMAIS dans decision_maker, decision_maker_role, company_size, company_size_code.
-    - Débit max 5 consultations/jour sur LinkedIn pour les dirigeants MATCH_CONFIRMED.
+    
+    Rôle architectural :
+    - Outil de repli secondaire (Fallback Niveau 3) exclusivement activé lorsque
+      les requêtes HTTP standard échouent face à un WAF (Cloudflare, etc.) ou pour
+      des consultations unitaires strictes sur annuaires / réseaux professionnels (ADR-008).
+      
+    Capacités réelles & Limites (Non-Garanties) :
+    - Réduit la détectabilité via patchright (patch anti-détection CDP, masquage
+      navigator.webdriver, courbes de souris et timing réaliste).
+    - NON-GARANTIE : Ne garantit en aucun cas un contournement à 100% de Cloudflare Turnstile,
+      DataDome, ni le passage des murs d'authentification obligatoires (login wall).
+    - Interdiction formelle du scraping de masse non supervisé.
+    - Débit strictement plafonné à 5 consultations unitaires/jour sur profils validés.
+    
+    Règles absolues d'étanchéité (Niveau 4 -> Niveau 1/2) :
+    - N'écrit JAMAIS dans siren, company_name, legal_status, company_size, company_size_code,
+      decision_maker, decision_maker_role, decision_maker_is_person.
+    - Toute tentative d'injection dans un champ légal protégé est immédiatement bloquée.
     """
 
     FORBIDDEN_FIELDS = {
-        "decision_maker",
-        "decision_maker_role",
+        "siren",
+        "company_name",
+        "legal_status",
         "company_size",
         "company_size_code",
+        "decision_maker",
+        "decision_maker_role",
+        "decision_maker_is_person",
     }
 
     def __init__(self, headless: bool = True, timeout_ms: int = 15000, enabled: bool = True):
@@ -55,7 +71,7 @@ class InvisiblePlaywrightProvider(BaseProvider):
         if field_target in self.FORBIDDEN_FIELDS:
             raise ProviderError(
                 f"Violation d'étanchéité : le provider Niveau 4 {self.name} "
-                f"ne peut pas alimenter le champ légal '{field_target}'",
+                f"ne peut pas alimenter le champ légal réservé '{field_target}'",
                 ProviderStatus.INVALID_INPUT,
                 recoverable=False
             )
@@ -87,7 +103,11 @@ class InvisiblePlaywrightProvider(BaseProvider):
                 from playwright.sync_api import sync_playwright
                 engine = "playwright"
             except ImportError:
-                raise ProviderError("Ni patchright ni playwright ne sont disponibles", ProviderStatus.TOOL_MISSING)
+                raise ProviderError(
+                    "Ni patchright ni playwright ne sont disponibles",
+                    ProviderStatus.TOOL_UNAVAILABLE,
+                    recoverable=False
+                )
 
         evidences: List[Evidence] = []
         raw_info: Dict[str, Any] = {"engine": engine, "trigger_type": trigger_type}
@@ -147,6 +167,7 @@ class InvisiblePlaywrightProvider(BaseProvider):
                         evidence_text=f"Activité LinkedIn consultée publiquement sans connexion : {has_recent_activity}",
                         confidence=ConfidenceLevel.HIGH.value,
                         lead_id=lead_id,
+                        browser_usage_reason=trigger_type,
                         metadata={"profile_url": url, "engine": engine}
                     ))
                 else:
@@ -165,6 +186,7 @@ class InvisiblePlaywrightProvider(BaseProvider):
                             evidence_text=f"Offre observée via navigateur furtif : {page_title[:80]}",
                             confidence=ConfidenceLevel.MEDIUM.value,
                             lead_id=lead_id,
+                            browser_usage_reason=trigger_type,
                             metadata={"engine": engine}
                         ))
 

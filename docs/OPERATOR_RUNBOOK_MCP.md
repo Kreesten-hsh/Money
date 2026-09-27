@@ -9,13 +9,21 @@
 
 ## 1. Contexte & Principes Directeurs
 
-L'outil `invisible_playwright_mcp` fournit un navigateur Chromium patché (Playwright furtif) avec émulation de mouvements de souris réalistes et contournement natif des protections anti-bots (Cloudflare Turnstile, DataDome, Akamai).
+L'outil `invisible_playwright_mcp` fournit un navigateur Chromium piloté via `patchright` (ou Playwright) configuré pour minimiser la détection automatisée (masquage de `navigator.webdriver`, courbes de souris réalistes, gestion des en-têtes et CDP patché).
+
+### Capacités Réelles vs Non-Garanties (Section 5 Spécification)
+> [!IMPORTANT]
+> - **Capacités Réelles** : Permet de franchir des challenges anti-bots basiques ou d'accéder à des pages d'accueil et annuaires publics rejetant les requêtes HTTP brutes (ex: 403 Forbidden sur `urllib`).
+> - **NON-GARANTIE ABSOLUE** : Ne garantit en aucun cas un contournement à 100% de Cloudflare Turnstile, DataDome, Akamai ou de tout système de détection comportementale avancée.
+> - **Murs d'authentification** : Ne permet aucun contournement des pages nécessitant un compte connecté ou une authentification obligatoire (login wall).
+> - **Interdiction du Scraping de Masse** : L'outil est strictement un moteur de repli unitaire, et non un outil de moissonnage industriel.
 
 Conformément à **ADR-008** et à la politique de conformité RGPD (`docs/DATA_POLICY.md` §B), son utilisation par l'opérateur IA est **strictement encadrée** :
 1. **Lecture Seule Exclusive** : Aucune interaction d'écriture, aucun envoi de message, aucune soumission de formulaire automatisé.
 2. **Zéro Compte Connecté** : Interdiction absolue de connecter des comptes personnels (notamment LinkedIn). Les consultations se font exclusivement sur des pages et profils publics accessibles sans authentification.
 3. **Plafond de Fréquence** : 3 à 5 consultations unitaires ciblées par jour maximum.
 4. **Zéro Stockage Privé** : Seules des métadonnées professionnelles publiques observables et vérifiables sont consignées.
+5. **Justification Obligatoire (`browser_usage_reason`)** : Chaque évidence produite par le navigateur doit obligatoirement porter la mention explicite du motif d'appel (`annuaire_fallback`, `unitaire_linkedin_adr008`, `waf_fallback`).
 
 ---
 

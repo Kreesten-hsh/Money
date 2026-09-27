@@ -10,6 +10,8 @@ class ProviderStatus(str, Enum):
     Interdiction absolue d'assimiler une panne technique à un NO_RESULT.
     """
     SUCCESS = "SUCCESS"
+    SUCCESS_EMPTY = "SUCCESS_EMPTY"
+    SUCCESS_WITH_RESULTS = "SUCCESS_WITH_RESULTS"
     NO_RESULT = "NO_RESULT"
     PARTIAL = "PARTIAL"
     RATE_LIMITED = "RATE_LIMITED"
@@ -18,6 +20,9 @@ class ProviderStatus(str, Enum):
     NETWORK_ERROR = "NETWORK_ERROR"
     AUTH_REQUIRED = "AUTH_REQUIRED"
     TOOL_MISSING = "TOOL_MISSING"
+    TOOL_UNAVAILABLE = "TOOL_UNAVAILABLE"
+    CONFIG_ERROR = "CONFIG_ERROR"
+    PARSE_ERROR = "PARSE_ERROR"
     INVALID_INPUT = "INVALID_INPUT"
     UNKNOWN_ERROR = "UNKNOWN_ERROR"
 
@@ -31,6 +36,9 @@ class ProviderStatus(str, Enum):
             ProviderStatus.NETWORK_ERROR,
             ProviderStatus.AUTH_REQUIRED,
             ProviderStatus.TOOL_MISSING,
+            ProviderStatus.TOOL_UNAVAILABLE,
+            ProviderStatus.CONFIG_ERROR,
+            ProviderStatus.PARSE_ERROR,
             ProviderStatus.UNKNOWN_ERROR
         }
 

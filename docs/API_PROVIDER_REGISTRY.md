@@ -67,3 +67,14 @@ Aucune API n'est considérée comme intégrée simplement parce qu'elle figure d
 - **Coût** : Payant au-delà du quota d'essai (rejeté par la politique Budget 0 €).
 - **Authentification** : Clé API obligatoire.
 - **Remplacement dans Money** : `CmsTechnologyProvider` natif stdlib (signatures HTML et headers HTTP observables).
+
+---
+
+## 4. Comportement d'Exécution et Gestion des Erreurs du Registre
+
+L'adaptateur `ApiRegistryProvider` garantit l'application stricte des règles suivantes lors de tout appel :
+1. **API Inconnue du Catalogue** : Retourne immédiatement `ProviderStatus.INVALID_INPUT` avec rejet explicite.
+2. **API Inactive ou Non-Implémentée** : Retourne immédiatement `ProviderStatus.TOOL_MISSING` (interdiction formelle de prétendre au succès ou de renvoyer un dataset vide).
+3. **Erreur Réseau / Timeout** : Retourne `ProviderStatus.NETWORK_ERROR` ou `ProviderStatus.TIMEOUT` (zéro conversion en `NO_RESULT`).
+4. **Réponse Malformée ou Invalide** : Si la réponse HTTP 200 ne contient pas de JSON analysable ou viole le schéma attendu, le provider retourne formellement `ProviderStatus.PARSE_ERROR`.
+

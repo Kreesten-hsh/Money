@@ -2,6 +2,35 @@
 
 Toutes les évolutions significatives du code, de la documentation et des données sont consignées ici.
 
+## [2026-09-27] — Architecture V2.1 : Audit & Correctif Intégration Outils MCP / OSINT (Branche feat/architecture-v2.1-tool-audit-and-fix)
+### Ajouté & Corrigé
+- **[Audit & Statuts Explicites]** :
+  - Enrichissement de `ProviderStatus` avec les statuts explicites : `SUCCESS_EMPTY`, `SUCCESS_WITH_RESULTS`, `TOOL_UNAVAILABLE`, `CONFIG_ERROR`, `PARSE_ERROR`.
+  - Intégration de `TOOL_UNAVAILABLE`, `CONFIG_ERROR` et `PARSE_ERROR` dans `is_technical_failure` pour interdire formellement le masquage des pannes sous `NO_RESULT`.
+- **[Outil 1 : invisible_playwright_mcp]** :
+  - Définition stricte du rôle de repli secondaire (WAF / 403 / ADR-008).
+  - Formalisation des capacités réelles vs non-garanties (aucune garantie 100% Turnstile/DataDome, aucun passage de login wall).
+  - Traçabilité obligatoire de `browser_usage_reason` sur toute preuve générée.
+  - Verrouillage absolu de l'étanchéité légale SIRENE (rejet immédiat de toute tentative d'injection dans `siren`, `company_name`, `company_size`, `decision_maker`, etc.).
+- **[Outil 2 : theHarvester]** :
+  - Intégration du module `money_v2.contracts.confidence_policy` avec classification stricte des emails : `GENERIC_EMAIL`, `INDIVIDUAL_PROFESSIONAL_EMAIL`, `DECISION_MAKER_MATCHED_EMAIL`, `UNVERIFIED_PUBLIC_EMAIL`.
+  - Interdiction absolue de promotion d'une adresse générique en email de dirigeant sans preuve d'attribution (`ConfidencePolicyViolationError`).
+  - Statut réel `TOOL_UNAVAILABLE` retourné en l'absence du binaire système sans feindre de résultat.
+  - Gestion explicite de `CONFIG_ERROR` et `PARSE_ERROR`.
+- **[Outil 3 : Crawlee]** :
+  - Moteur de batch crawling multi-pages avec file d'attente, retries, limitation de concurrence et backoff exponentiel.
+  - Détection et reporting d'état individuel par URL source (`status_by_url`).
+  - Rapport complet entrée -> exécution -> résultat brut -> normalisé -> évidences structurées.
+- **[Outil 4 : API-mega-list]** :
+  - Clarification du rôle de catalogue de découverte (index de 11 860 APIs), distinct d'un service d'enrichissement.
+  - Validation de l'adaptateur actif `google_dns_doh` (DNS over HTTPS via `dns.google` sans clé API).
+  - Rejet systématique et contrôlé des APIs inactives (`wappalyzer_core` etc.) retournant `TOOL_MISSING` / `INACTIVE`.
+  - Détection et qualification immédiate en `PARSE_ERROR` en cas de payload distant invalide.
+- **[Suite de Tests Négatifs V2.1]** :
+  - Création de `tests/test_v2_1_negative_suite.py` couvrant les 10 tests négatifs stricts de la Section 13 (10/10 PASS).
+  - Script d'exécution E2E `tests/run_e2e_scenarios.py` produisant le rapport structuré Section 21 pour les 4 outils (4/4 PASS).
+  - Maintien intégral des 24 tests de `tests/test_v2_architecture.py` (24/24 PASS) et des 24 contrôles / 21 fixtures de `qa_check.py` (PASS).
+
 ## [2026-09-27] — Architecture V2 : Intégration Complète OSINT, Providers, Chaîne de Repli & Observabilité (Branche feat/architecture-v2-provider-integration)
 ### Ajouté
 - **[Architecture V2 & Modèle d'Évidence]** :

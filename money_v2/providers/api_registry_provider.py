@@ -96,7 +96,22 @@ class ApiRegistryProvider(BaseProvider):
                 )
                 with urllib.request.urlopen(req, timeout=5.0) as resp:
                     if resp.status == 200:
-                        payload = json.loads(resp.read().decode("utf-8"))
+                        try:
+                            payload = json.loads(resp.read().decode("utf-8"))
+                        except Exception as e:
+                            return ProviderResult(
+                                provider=self.name,
+                                status=ProviderStatus.PARSE_ERROR,
+                                evidences=[],
+                                raw_payload={"json_parse_error": str(e)}
+                            )
+                        if not isinstance(payload, dict):
+                            return ProviderResult(
+                                provider=self.name,
+                                status=ProviderStatus.PARSE_ERROR,
+                                evidences=[],
+                                raw_payload={"invalid_schema": "Expected dictionary response"}
+                            )
                         answers = payload.get("Answer", [])
                         evidences: List[Evidence] = []
                         if answers:

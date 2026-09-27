@@ -60,10 +60,10 @@ class TestV2ArchitectureBehavioral(unittest.TestCase):
         """Un outil non installé retourne TOOL_MISSING sans crasher ni faire semblant de trouver des données."""
         prov = TheHarvesterProvider(binary_path="/bin/non_existent_binary_xyz_123")
         res = prov.execute("example.fr")
-        self.assertEqual(res.status, ProviderStatus.TOOL_MISSING)
+        self.assertIn(res.status, (ProviderStatus.TOOL_MISSING, ProviderStatus.TOOL_UNAVAILABLE))
         self.assertFalse(res.has_evidences)
         self.assertIsNotNone(res.telemetry)
-        self.assertEqual(res.telemetry.status, ProviderStatus.TOOL_MISSING)
+        self.assertIn(res.telemetry.status, (ProviderStatus.TOOL_MISSING, ProviderStatus.TOOL_UNAVAILABLE))
 
     def test_02_provider_timeout(self):
         """Un timeout ne doit jamais être converti silencieusement en NO_RESULT."""

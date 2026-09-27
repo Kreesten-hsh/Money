@@ -63,13 +63,14 @@ class BaseProvider(ABC):
         if not self.is_available():
             finished_at = get_current_iso_timestamp()
             duration_ms = (time.perf_counter() - t0) * 1000.0
+            missing_st = getattr(self, "missing_status", ProviderStatus.TOOL_MISSING)
             telem = ProviderTelemetry(
                 provider=self.name,
                 lead_id=lead_id,
                 started_at=started_at,
                 finished_at=finished_at,
                 duration_ms=duration_ms,
-                status=ProviderStatus.TOOL_MISSING,
+                status=missing_st,
                 records_found=0,
                 evidence_count=0,
                 error_type="ToolMissing",
@@ -77,7 +78,7 @@ class BaseProvider(ABC):
             )
             return ProviderResult(
                 provider=self.name,
-                status=ProviderStatus.TOOL_MISSING,
+                status=missing_st,
                 evidences=[],
                 telemetry=telem
             )

@@ -46,7 +46,11 @@ class ProviderResult:
 
     @property
     def is_success(self) -> bool:
-        return self.status == ProviderStatus.SUCCESS
+        return self.status in {
+            ProviderStatus.SUCCESS,
+            ProviderStatus.SUCCESS_WITH_RESULTS,
+            ProviderStatus.SUCCESS_EMPTY
+        }
 
     @property
     def has_evidences(self) -> bool:
