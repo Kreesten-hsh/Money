@@ -77,6 +77,23 @@ class EnrichmentOrchestrator:
                 lead[f"{ev.field}_evidence"] = ev.evidence_text
             if ev.observed_at:
                 lead[f"{ev.field}_checked_at"] = ev.observed_at
+
+            # Mappages d'alias selon le schéma officiel QA Money V2
+            if ev.field == "cms_detected":
+                if ev.source:
+                    lead["cms_source"] = ev.source
+                if ev.evidence_text:
+                    lead["cms_evidence"] = ev.evidence_text
+                if ev.observed_at:
+                    lead["cms_checked_at"] = ev.observed_at
+            elif ev.field == "public_professional_email":
+                if ev.source:
+                    lead["email_source"] = ev.source
+                if ev.evidence_text:
+                    lead["email_evidence"] = ev.evidence_text
+                if ev.observed_at:
+                    lead["email_checked_at"] = ev.observed_at
+
             collected_list.append(ev)
 
     def enrich_lead(self, lead: Dict[str, Any]) -> Tuple[Dict[str, Any], List[Evidence]]:
@@ -86,12 +103,17 @@ class EnrichmentOrchestrator:
         """
         enriched = dict(lead)
         collected_evidences: List[Evidence] = []
-        domain = str(lead.get("domain") or "").strip().lower()
         website = str(lead.get("website") or "").strip()
+        domain = str(lead.get("domain") or "").strip().lower()
+        if not domain and website:
+            clean_w = website.replace("https://", "").replace("http://", "").split("/")[0].split("?")[0].lower()
+            domain = clean_w.replace("www.", "")
+        enriched["domain"] = domain
         lead_id = str(lead.get("brand_name") or domain or "unknown_lead")
         context = {
             "lead_id": lead_id,
             "domain": domain,
+            "website": website,
             "decision_maker": lead.get("decision_maker")
         }
 
@@ -118,15 +140,19 @@ class EnrichmentOrchestrator:
                 self.hub.record(dns_res.telemetry)
             self._apply_evidences(enriched, dns_res.evidences, collected_evidences)
 
-        # 3. Détection d'empreinte CMS si non déjà détectée
-        if target_url and (not enriched.get("cms_detected") or enriched.get("cms_detected") == "Non détecté"):
+        # 3. Détection d'empreinte CMS si non déjà détectée ou si preuve manquante
+        if target_url and (
+            not enriched.get("cms_detected")
+            or enriched.get("cms_detected") in ("Non détecté", "Inconnu")
+            or not enriched.get("cms_source")
+        ):
             cms_res = self.cms_prov.execute(target_url, context)
             if cms_res.telemetry:
                 self.hub.record(cms_res.telemetry)
             self._apply_evidences(enriched, cms_res.evidences, collected_evidences)
 
         # 4. OSINT passif via theHarvester pour public_professional_email si absent
-        if domain and not enriched.get("public_professional_email"):
+        if domain and (not enriched.get("public_professional_email") or enriched.get("public_professional_email") in ("Non découvert", "Non extrait (Option)")):
             th_res = self.th_prov.execute(domain, context)
             if th_res.telemetry:
                 self.hub.record(th_res.telemetry)

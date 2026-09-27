@@ -176,11 +176,30 @@ def main():
     # Sauvegarde CSV
     out_csv = Path(args.output_csv)
     if all_leads:
-        fieldnames = list(all_leads[0].keys())
+        all_keys = []
+        seen_keys = set()
+        for l in all_leads:
+            for k in l.keys():
+                if k not in seen_keys:
+                    seen_keys.add(k)
+                    all_keys.append(k)
+        
+        # Préparation des lignes pour CSV (conversion des dicts/lists en str)
+        csv_rows = []
+        for l in all_leads:
+            row = {}
+            for k in all_keys:
+                val = l.get(k)
+                if isinstance(val, (dict, list)):
+                    row[k] = json.dumps(val, ensure_ascii=False)
+                else:
+                    row[k] = val
+            csv_rows.append(row)
+
         with open(out_csv, "w", encoding="utf-8", newline="") as f:
-            writer = csv.DictWriter(f, fieldnames=fieldnames)
+            writer = csv.DictWriter(f, fieldnames=all_keys, extrasaction="ignore")
             writer.writeheader()
-            writer.writerows(all_leads)
+            writer.writerows(csv_rows)
 
     # Génération Notion Lead Room
     notion_file = Path(args.notion_output)
