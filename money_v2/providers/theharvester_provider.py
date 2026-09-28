@@ -54,8 +54,8 @@ class TheHarvesterProvider(BaseProvider):
         self.missing_status = ProviderStatus.TOOL_UNAVAILABLE
 
     def _resolve_binary(self) -> Optional[str]:
-        if self._binary_path and Path(self._binary_path).exists():
-            return self._binary_path
+        if self._binary_path:
+            return self._binary_path if Path(self._binary_path).exists() else None
         candidates = ["theHarvester", "theharvester"]
         for c in candidates:
             found = shutil.which(c)
